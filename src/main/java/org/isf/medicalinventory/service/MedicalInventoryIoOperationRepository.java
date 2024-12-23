@@ -60,4 +60,7 @@ public interface MedicalInventoryIoOperationRepository extends JpaRepository<Med
 	Page<MedicalInventory> findInventoryBetweenDatesAndTypePageable(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo,
 		@Param("type") String type, Pageable pageable);
 
+	@Query(value = "select count(medinv) from MedicalInventory medinv where medinv.inventoryType = :type")
+	int countByInventoryType(@Param("type") String type);
+
 }
