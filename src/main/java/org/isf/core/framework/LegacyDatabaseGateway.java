@@ -52,9 +52,11 @@ final class LegacyDatabaseGateway implements DatabaseGateway {
         public void close() {
             if (entityManager != null && entityManager.isOpen()) {
                 try {
-                    entityManager.close();
+                    // DbJpaUtil stores this EntityManager in a static field used by legacy code.
+                    // Clearing it ensures unit of work isolation without breaking the singleton.
+                    entityManager.clear();
                 } catch (RuntimeException runtimeException) {
-                    LOGGER.warn("Unable to close EntityManager", runtimeException);
+                    LOGGER.warn("Unable to clear EntityManager", runtimeException);
                 }
             }
         }
