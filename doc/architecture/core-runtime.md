@@ -7,15 +7,11 @@ Establish a first-class API for the runtime services that every module or future
 - **CoreConfiguration** &mdash; unified read-only view of application properties; legacy code continues to populate values via `settings.properties`.
 - **DatabaseGateway** &mdash; façade encapsulating `EntityManager` management and providing a safe execution model for database work units.
 - **CoreContext/CoreRuntime** &mdash; immutable container that wires the default adapters while allowing overrides when modules are migrated.
-- **PluginRuntime** &mdash; shadow runtime that discovers plugins, starts/stops them, and resolves feature calls with a legacy fallback bridge.
 
 ## Why now?
-This work covers step 2 of the microkernel migration: introducing a plugin runtime in shadow mode. Legacy deployment remains unchanged because:
-- plugin discovery defaults to `ServiceLoader` and starts no plugins unless they are explicitly provided,
-- feature execution falls back to `LegacyFeatureBridge`,
-- the default bridge is no-op, so existing call paths remain untouched.
+This is step 1 of the microkernel migration. Introducing the API without moving any business logic keeps the legacy deployment untouched while giving developers a stable contract to target.
 
 ## Next steps
-- Expose pilot features (for example reporting) through `PluginRuntime#executeFeature` while keeping legacy implementations behind `LegacyFeatureBridge`.
-- Add concrete plugin packages with `META-INF/services` registration.
-- Remove direct usage of legacy static helpers from modules once corresponding plugin handlers are stable.
+- Introduce plugin runtime infrastructure that consumes `CoreContext`.
+- Incrementally migrate non-critical modules to the new abstractions by providing dedicated adapters or implementations.
+- Remove direct usage of `GeneralData` and `DbJpaUtil` from refactored components in favour of the new contracts.

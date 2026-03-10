@@ -8,33 +8,33 @@ import java.util.Optional;
 import org.isf.utils.exception.OHException;
 import org.junit.jupiter.api.Test;
 
-class CoreRuntimeTest {
+class PluginRuntimeTest {
 
     @Test
     void shouldUsePluginFeatureBeforeLegacyFallback() throws OHException {
         StubPlugin plugin = new StubPlugin();
-        CoreRuntime runtime = CoreRuntime.builder()
-                .withPluginDiscovery(() -> List.of(plugin))
-                .withLegacyFeatureBridge((featureId, context) -> Optional.of("legacy-value"))
-                .build();
+        PluginRuntime runtime = new PluginRuntime(
+                CoreContext.builder().build(),
+                () -> List.of(plugin),
+                (featureId, context) -> Optional.of("legacy-value"));
 
-        runtime.plugins().start();
+        runtime.start();
 
-        assertThat(runtime.plugins().executeFeature("patients.lookup"))
+        assertThat(runtime.executeFeature("patients.lookup"))
                 .contains("plugin-value");
         assertThat(plugin.started).isTrue();
     }
 
     @Test
     void shouldFallbackToLegacyFeatureWhenPluginIsMissing() throws OHException {
-        CoreRuntime runtime = CoreRuntime.builder()
-                .withPluginDiscovery(List::of)
-                .withLegacyFeatureBridge((featureId, context) -> Optional.of("legacy-value"))
-                .build();
+        PluginRuntime runtime = new PluginRuntime(
+                CoreContext.builder().build(),
+                List::of,
+                (featureId, context) -> Optional.of("legacy-value"));
 
-        runtime.plugins().start();
+        runtime.start();
 
-        assertThat(runtime.plugins().executeFeature("patients.lookup"))
+        assertThat(runtime.executeFeature("patients.lookup"))
                 .contains("legacy-value");
     }
 
@@ -43,12 +43,13 @@ class CoreRuntimeTest {
         java.util.concurrent.atomic.AtomicInteger stopCounter = new java.util.concurrent.atomic.AtomicInteger();
         TrackingPlugin first = new TrackingPlugin("first", 1, stopCounter);
         TrackingPlugin second = new TrackingPlugin("second", 2, stopCounter);
-        CoreRuntime runtime = CoreRuntime.builder()
-                .withPluginDiscovery(() -> List.of(first, second))
-                .build();
+        PluginRuntime runtime = new PluginRuntime(
+                CoreContext.builder().build(),
+                () -> List.of(first, second),
+                new NoOpLegacyFeatureBridge());
 
-        runtime.plugins().start();
-        runtime.plugins().stop();
+        runtime.start();
+        runtime.stop();
 
         assertThat(first.events).containsExactly("start", "stop");
         assertThat(second.events).containsExactly("start", "stop");
