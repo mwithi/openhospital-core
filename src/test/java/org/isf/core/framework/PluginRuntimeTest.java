@@ -16,7 +16,7 @@ class PluginRuntimeTest {
         PluginRuntime runtime = new PluginRuntime(
                 CoreContext.builder().build(),
                 () -> List.of(plugin),
-                (featureId, context) -> Optional.of("legacy-value"));
+                new StubLegacyFeatureBridge("legacy-value"));
 
         runtime.start();
 
@@ -30,7 +30,7 @@ class PluginRuntimeTest {
         PluginRuntime runtime = new PluginRuntime(
                 CoreContext.builder().build(),
                 List::of,
-                (featureId, context) -> Optional.of("legacy-value"));
+                new StubLegacyFeatureBridge("legacy-value"));
 
         runtime.start();
 
@@ -54,6 +54,23 @@ class PluginRuntimeTest {
         assertThat(first.events).containsExactly("start", "stop");
         assertThat(second.events).containsExactly("start", "stop");
         assertThat(first.stopOrder).isGreaterThan(second.stopOrder);
+    }
+
+
+    private static final class StubLegacyFeatureBridge implements LegacyFeatureBridge {
+
+        private final String value;
+
+        private StubLegacyFeatureBridge(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public <T> Optional<T> invoke(String featureId, CoreContext context) {
+            @SuppressWarnings("unchecked")
+            T castedValue = (T) value;
+            return Optional.of(castedValue);
+        }
     }
 
     private static final class StubPlugin implements CorePlugin {
