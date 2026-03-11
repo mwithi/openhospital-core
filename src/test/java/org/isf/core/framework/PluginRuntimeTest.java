@@ -1,6 +1,7 @@
 package org.isf.core.framework;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,20 @@ class PluginRuntimeTest {
 
         assertThat(runtime.executeFeature("patients.lookup"))
                 .contains("legacy-value");
+    }
+
+    @Test
+    void shouldFailWhenPluginIdsAreDuplicated() {
+        CorePlugin first = new StubPluginWithId("duplicate.id");
+        CorePlugin second = new StubPluginWithId("duplicate.id");
+        PluginRuntime runtime = new PluginRuntime(
+                CoreContext.builder().build(),
+                () -> List.of(first, second),
+                new NoOpLegacyFeatureBridge());
+
+        assertThatThrownBy(runtime::start)
+                .isInstanceOf(OHException.class)
+                .hasMessageContaining("Duplicate pluginId detected: duplicate.id");
     }
 
     @Test
@@ -86,6 +101,26 @@ class PluginRuntimeTest {
         public void start(CoreContext context, PluginRegistry registry) {
             started = true;
             registry.registerFeature("patients.lookup", ctx -> "plugin-value");
+        }
+    }
+
+
+    private static final class StubPluginWithId implements CorePlugin {
+
+        private final String pluginId;
+
+        private StubPluginWithId(String pluginId) {
+            this.pluginId = pluginId;
+        }
+
+        @Override
+        public String pluginId() {
+            return pluginId;
+        }
+
+        @Override
+        public void start(CoreContext context, PluginRegistry registry) {
+            // no-op
         }
     }
 

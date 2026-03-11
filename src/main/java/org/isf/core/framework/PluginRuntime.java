@@ -2,8 +2,10 @@ package org.isf.core.framework;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.isf.utils.exception.OHException;
 
@@ -26,10 +28,20 @@ public final class PluginRuntime {
 
     public void start() throws OHException {
         List<CorePlugin> discoveredPlugins = new ArrayList<>(pluginDiscovery.discover());
+        validateUniquePluginIds(discoveredPlugins);
         discoveredPlugins.sort(Comparator.comparingInt(CorePlugin::order).thenComparing(CorePlugin::pluginId));
         for (CorePlugin plugin : discoveredPlugins) {
             plugin.start(context, pluginRegistry);
             startedPlugins.add(plugin);
+        }
+    }
+
+    private static void validateUniquePluginIds(List<CorePlugin> discoveredPlugins) throws OHException {
+        Set<String> pluginIds = new HashSet<>();
+        for (CorePlugin plugin : discoveredPlugins) {
+            if (!pluginIds.add(plugin.pluginId())) {
+                throw new OHException("Duplicate pluginId detected: " + plugin.pluginId());
+            }
         }
     }
 
