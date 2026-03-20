@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!--
+    OH-plugin-spi — Service Provider Interface for the Open Hospital plugin system.
+
+    FUNDAMENTAL RULE: this module must NOT depend on Spring, JPA, Hibernate,
+    or any other framework. It depends only on Java 17 and the SLF4J API.
+
+    This guarantees that:
+      - openhospital-gui can include the JAR without pulling Spring into its classpath
+      - Third-party plugin developers do not need to know the runtime internals
+      - The SPI contract remains stable regardless of Spring upgrade cycles
+  -->
+
+  <groupId>org.isf</groupId>
+  <artifactId>OH-plugin-spi</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>OpenHospital Plugin SPI</name>
+  <description>
+    Zero-framework SPI interfaces for the Open Hospital plugin system.
+    Used by: openhospital-core, openhospital-api, openhospital-gui,
+    and by any third-party plugin.
+  </description>
+  <url>www.open-hospital.org</url>
+
+  <organization>
+    <name>Informatici Senza Frontiere</name>
+    <url>www.informaticisenzafrontiere.org</url>
+  </organization>
+
+  <properties>
+    <java.version>17</java.version>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <slf4j.version>2.0.16</slf4j.version>
+    <junit.version>5.11.3</junit.version>
+    <assertj.version>3.26.3</assertj.version>
+  </properties>
+
+  <dependencies>
+
+    <!-- SLF4J API only — no implementation included. -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+
+    <!-- Test scope -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.1</version>
+        <configuration>
+          <!--
+            JUnit 5 uses reflection internally to discover and invoke test methods.
+            With JPMS, reflection across module boundaries is blocked by default.
+            The argLine below grants JUnit the minimum access it needs to run tests
+            against our module, without opening the module globally.
+          -->
+          <argLine>
+            --add-opens org.isf.plugin.spi/org.isf.plugin.model=ALL-UNNAMED
+            --add-opens org.isf.plugin.spi/org.isf.plugin.model.field=ALL-UNNAMED
+            --add-opens org.isf.plugin.spi/org.isf.plugin.spi=ALL-UNNAMED
+            --add-opens org.isf.plugin.spi/org.isf.plugin.event=ALL-UNNAMED
+            --add-opens org.isf.plugin.spi/org.isf.plugin.hook=ALL-UNNAMED
+            --add-opens org.isf.plugin.spi/org.isf.plugin.registry=ALL-UNNAMED
+            --add-opens org.isf.plugin.spi/org.isf.plugin.security=ALL-UNNAMED
+            --add-opens org.isf.plugin.spi/org.isf.plugin.model.ui=ALL-UNNAMED
+          </argLine>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals><goal>jar-no-fork</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Ensure no Spring dependency has been accidentally added -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>enforce-no-spring</id>
+            <goals><goal>enforce</goal></goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>org.springframework:*</exclude>
+                    <exclude>org.springframework.boot:*</exclude>
+                    <exclude>org.springframework.data:*</exclude>
+                    <exclude>org.hibernate:*</exclude>
+                    <exclude>jakarta.persistence:*</exclude>
+                  </excludes>
+                  <message>
+                    OH-plugin-spi must remain zero-framework.
+                    Do not add Spring, Hibernate, or JPA.
+                  </message>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

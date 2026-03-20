@@ -1,0 +1,14 @@
+# File ServiceLoader per il discovery automatico dei plugin OH.
+#
+# I plugin di terze parti devono includere questo file nel proprio JAR
+# con il FQCN della propria classe che implementa OHPlugin, es:
+#
+#   org.isf.radiology.RadiologyPlugin
+#
+# Il PluginManager usa ServiceLoader.load(OHPlugin.class, pluginClassLoader)
+# per istanziare automaticamente il plugin senza reflection manuale.
+#
+# ATTENZIONE: questo file nel modulo plugin-spi è placeholder/documentazione.
+# Ogni plugin di terze parti deve creare il proprio file:
+#   META-INF/services/org.isf.plugin.spi.OHPlugin
+# nel proprio JAR, contenente il FQCN della propria implementazione.

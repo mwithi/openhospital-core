@@ -1,0 +1,264 @@
+<svg width="900" height="1260" viewBox="0 0 900 1260"
+     xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#888" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="1260" fill="#FAFAFA"/>
+
+  <!-- title -->
+  <text x="450" y="36" text-anchor="middle" font-size="20" font-weight="bold" fill="#1F5C99">OH-plugin-spi v7 — Module Map</text>
+  <text x="450" y="56" text-anchor="middle" font-size="12" fill="#888">28 source files · 8 packages · 96 tests · JPMS module-info · zero framework dependencies</text>
+  <line x1="40" y1="66" x2="860" y2="66" stroke="#CCCCCC" stroke-width="1"/>
+
+  <!-- ══════════════════ ROW 1: model | spi | registry ══════════════════ -->
+
+  <!-- model -->
+  <rect x="40" y="78" width="269" height="236" rx="10" fill="#E8F0FB" stroke="#5B8DD9" stroke-width="1.2"/>
+  <text x="174" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#1F5C99">model</text>
+  <rect x="52" y="106" width="245" height="22" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="174" y="120" text-anchor="middle" font-size="11" fill="#1F3A5F">PluginDescriptor  (immutable builder)</text>
+  <rect x="52" y="132" width="245" height="22" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="174" y="146" text-anchor="middle" font-size="11" fill="#1F3A5F">ExternalConnection  (record + validation)</text>
+  <rect x="52" y="158" width="245" height="22" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="174" y="172" text-anchor="middle" font-size="11" fill="#1F3A5F">FieldPermission  (read/write builder)</text>
+  <rect x="52" y="184" width="245" height="22" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="174" y="198" text-anchor="middle" font-size="11" fill="#1F3A5F">PermissionCheckResult  (GRANTED · DENIED_*)</text>
+  <rect x="52" y="210" width="119" height="22" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="111" y="224" text-anchor="middle" font-size="11" fill="#1F3A5F">PluginCapability</text>
+  <rect x="179" y="210" width="118" height="22" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="238" y="224" text-anchor="middle" font-size="11" fill="#1F3A5F">PluginPermission</text>
+  <rect x="52" y="236" width="245" height="22" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="174" y="250" text-anchor="middle" font-size="11" fill="#1F3A5F">PluginStatus  (state machine)</text>
+  <rect x="52" y="262" width="245" height="44" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="174" y="279" text-anchor="middle" font-size="11" fill="#1F3A5F">UiContribution  (builder + consistency</text>
+  <text x="174" y="297" text-anchor="middle" font-size="10" fill="#1F3A5F">validation against PluginCapability)</text>
+
+  <!-- spi -->
+  <rect x="320" y="78" width="269" height="236" rx="10" fill="#E3F4EC" stroke="#2E9E66" stroke-width="1.2"/>
+  <text x="454" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#1A6640">spi</text>
+  <rect x="332" y="106" width="245" height="22" rx="4" fill="#B8E8D0" stroke="#2E9E66" stroke-width="0.5"/>
+  <text x="454" y="120" text-anchor="middle" font-size="11" fill="#0D4028">OHPlugin  (onStart · onStop · onInstall · onUninstall)</text>
+  <rect x="332" y="132" width="245" height="22" rx="4" fill="#B8E8D0" stroke="#2E9E66" stroke-width="0.5"/>
+  <text x="454" y="146" text-anchor="middle" font-size="11" fill="#0D4028">OHPluginLifecycleException  (checked)</text>
+  <rect x="332" y="158" width="245" height="22" rx="4" fill="#B8E8D0" stroke="#2E9E66" stroke-width="0.5"/>
+  <text x="454" y="172" text-anchor="middle" font-size="11" fill="#0D4028">MigrationScript</text>
+  <rect x="332" y="184" width="245" height="44" rx="4" fill="#B8E8D0" stroke="#2E9E66" stroke-width="0.5"/>
+  <text x="454" y="201" text-anchor="middle" font-size="11" fill="#0D4028">MigrationContext  (inner)</text>
+  <text x="454" y="219" text-anchor="middle" font-size="10" fill="#2A6644">getConnection()  ·  getTablePrefix()</text>
+
+  <!-- registry -->
+  <rect x="600" y="78" width="260" height="236" rx="10" fill="#FFF3E0" stroke="#E08000" stroke-width="1.2"/>
+  <text x="730" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#7A4500">registry</text>
+  <rect x="612" y="106" width="236" height="22" rx="4" fill="#FFD9A0" stroke="#E08000" stroke-width="0.5"/>
+  <text x="730" y="120" text-anchor="middle" font-size="11" fill="#4A2800">PluginContext  (the only gateway)</text>
+  <rect x="612" y="132" width="236" height="22" rx="4" fill="#FFD9A0" stroke="#E08000" stroke-width="0.5"/>
+  <text x="730" y="146" text-anchor="middle" font-size="11" fill="#4A2800">check(permission) → PermissionCheckResult</text>
+  <rect x="612" y="158" width="236" height="22" rx="4" fill="#FFD9A0" stroke="#E08000" stroke-width="0.5"/>
+  <text x="730" y="172" text-anchor="middle" font-size="11" fill="#4A2800">PluginDataAccessor  +  PatientView</text>
+  <rect x="612" y="184" width="236" height="22" rx="4" fill="#FFD9A0" stroke="#E08000" stroke-width="0.5"/>
+  <text x="730" y="198" text-anchor="middle" font-size="11" fill="#4A2800">PluginHttpClient  (allowlist-enforced)</text>
+  <rect x="612" y="210" width="114" height="22" rx="4" fill="#FFD9A0" stroke="#E08000" stroke-width="0.5"/>
+  <text x="669" y="224" text-anchor="middle" font-size="11" fill="#4A2800">PluginRegistry</text>
+  <rect x="734" y="210" width="114" height="22" rx="4" fill="#FFD9A0" stroke="#E08000" stroke-width="0.5"/>
+  <text x="791" y="224" text-anchor="middle" font-size="11" fill="#4A2800">PluginConfig</text>
+  <rect x="612" y="236" width="236" height="22" rx="4" fill="#FFD9A0" stroke="#E08000" stroke-width="0.5"/>
+  <text x="730" y="250" text-anchor="middle" font-size="11" fill="#4A2800">PluginAuthorizationException  (carries result)</text>
+  <rect x="612" y="262" width="236" height="44" rx="4" fill="#FFD9A0" stroke="#E08000" stroke-width="0.5"/>
+  <text x="730" y="279" text-anchor="middle" font-size="11" fill="#4A2800">ManagerExtensionRegistry</text>
+  <text x="730" y="297" text-anchor="middle" font-size="10" fill="#7A4500">register()  ·  unregisterAll()</text>
+
+  <!-- ══════════════════ ROW 2: event | hook | security ══════════════════ -->
+
+  <!-- event -->
+  <rect x="40" y="330" width="269" height="120" rx="10" fill="#FDECEA" stroke="#D32F2F" stroke-width="1.2"/>
+  <text x="174" y="350" text-anchor="middle" font-size="13" font-weight="bold" fill="#7A1A1A">event</text>
+  <rect x="52" y="358" width="245" height="22" rx="4" fill="#F9BABA" stroke="#D32F2F" stroke-width="0.5"/>
+  <text x="174" y="372" text-anchor="middle" font-size="11" fill="#5C0000">OHPluginEvent  (base · UUID · Instant)</text>
+  <rect x="52" y="384" width="245" height="22" rx="4" fill="#F9BABA" stroke="#D32F2F" stroke-width="0.5"/>
+  <text x="174" y="398" text-anchor="middle" font-size="11" fill="#5C0000">OHDomainEvents  (ID-only inner classes)</text>
+  <rect x="52" y="410" width="245" height="22" rx="4" fill="#F9BABA" stroke="#D32F2F" stroke-width="0.5"/>
+  <text x="174" y="424" text-anchor="middle" font-size="11" fill="#5C0000">PluginEventBus  (publish · subscribe · unsubscribeAll)</text>
+
+  <!-- hook -->
+  <rect x="320" y="330" width="269" height="120" rx="10" fill="#E3F4EC" stroke="#2E9E66" stroke-width="1.2"/>
+  <text x="454" y="350" text-anchor="middle" font-size="13" font-weight="bold" fill="#1A6640">hook</text>
+  <rect x="332" y="358" width="245" height="22" rx="4" fill="#B8E8D0" stroke="#2E9E66" stroke-width="0.5"/>
+  <text x="454" y="372" text-anchor="middle" font-size="11" fill="#0D4028">OHManagerExtension  (chain of responsibility)</text>
+  <rect x="332" y="384" width="245" height="22" rx="4" fill="#B8E8D0" stroke="#2E9E66" stroke-width="0.5"/>
+  <text x="454" y="398" text-anchor="middle" font-size="11" fill="#0D4028">beforeOperation()  — may block</text>
+  <rect x="332" y="410" width="245" height="22" rx="4" fill="#B8E8D0" stroke="#2E9E66" stroke-width="0.5"/>
+  <text x="454" y="424" text-anchor="middle" font-size="11" fill="#0D4028">afterOperation()  — errors logged, not propagated</text>
+
+  <!-- security -->
+  <rect x="600" y="330" width="260" height="120" rx="10" fill="#F3E5F5" stroke="#8E24AA" stroke-width="1.2"/>
+  <text x="730" y="350" text-anchor="middle" font-size="13" font-weight="bold" fill="#4A0066">security</text>
+  <rect x="612" y="358" width="236" height="22" rx="4" fill="#DDB8E8" stroke="#8E24AA" stroke-width="0.5"/>
+  <text x="730" y="372" text-anchor="middle" font-size="11" fill="#2E0044">PluginSecurityPolicy  (install-time SPI)</text>
+  <rect x="612" y="384" width="114" height="22" rx="4" fill="#DDB8E8" stroke="#8E24AA" stroke-width="0.5"/>
+  <text x="669" y="398" text-anchor="middle" font-size="11" fill="#2E0044">ValidationResult</text>
+  <rect x="734" y="384" width="114" height="22" rx="4" fill="#DDB8E8" stroke="#8E24AA" stroke-width="0.5"/>
+  <text x="791" y="398" text-anchor="middle" font-size="11" fill="#2E0044">ValidationContext</text>
+  <rect x="612" y="410" width="236" height="22" rx="4" fill="#DDB8E8" stroke="#8E24AA" stroke-width="0.5"/>
+  <text x="730" y="424" text-anchor="middle" font-size="11" fill="#2E0044">success()  ·  failure(reason)</text>
+
+  <!-- ══════════════════ ROW 3: model/field ══════════════════ -->
+  <rect x="40" y="466" width="820" height="100" rx="10" fill="#E8F0FB" stroke="#5B8DD9" stroke-width="1.2"/>
+  <text x="450" y="486" text-anchor="middle" font-size="13" font-weight="bold" fill="#1F5C99">model / field — domain field catalogues</text>
+  <rect x="52"  y="496" width="116" height="60" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="110" y="516" text-anchor="middle" font-size="11" font-weight="bold" fill="#1F3A5F">FieldSensitivity</text>
+  <text x="110" y="532" text-anchor="middle" font-size="10" fill="#1F3A5F">ID · INTERNAL</text>
+  <text x="110" y="547" text-anchor="middle" font-size="10" fill="#1F3A5F">PERSONAL · CLINICAL · SENSITIVE</text>
+  <rect x="178" y="496" width="96" height="60" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="226" y="516" text-anchor="middle" font-size="11" font-weight="bold" fill="#1F3A5F">DomainField</text>
+  <text x="226" y="532" text-anchor="middle" font-size="10" fill="#1F3A5F">interface</text>
+  <text x="226" y="547" text-anchor="middle" font-size="10" fill="#1F3A5F">fieldName · sensitivity · writeable</text>
+  <rect x="284" y="496" width="100" height="60" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="334" y="516" text-anchor="middle" font-size="11" font-weight="bold" fill="#1F3A5F">PatientField</text>
+  <text x="334" y="532" text-anchor="middle" font-size="10" fill="#1F3A5F">20 fields</text>
+  <text x="334" y="547" text-anchor="middle" font-size="10" fill="#1F3A5F">incl. TAX_CODE (SENSITIVE)</text>
+  <rect x="394" y="496" width="108" height="60" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="448" y="516" text-anchor="middle" font-size="11" font-weight="bold" fill="#1F3A5F">AdmissionField</text>
+  <text x="448" y="532" text-anchor="middle" font-size="10" fill="#1F3A5F">19 fields</text>
+  <text x="448" y="547" text-anchor="middle" font-size="10" fill="#1F3A5F">dates · diagnosis · vitals</text>
+  <rect x="512" y="496" width="108" height="60" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="566" y="516" text-anchor="middle" font-size="11" font-weight="bold" fill="#1F3A5F">LaboratoryField</text>
+  <text x="566" y="532" text-anchor="middle" font-size="10" fill="#1F3A5F">13 fields</text>
+  <text x="566" y="547" text-anchor="middle" font-size="10" fill="#1F3A5F">exam · result · reference range</text>
+  <rect x="630" y="496" width="100" height="60" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="680" y="516" text-anchor="middle" font-size="11" font-weight="bold" fill="#1F3A5F">WardField</text>
+  <text x="680" y="532" text-anchor="middle" font-size="10" fill="#1F3A5F">9 fields</text>
+  <text x="680" y="547" text-anchor="middle" font-size="10" fill="#1F3A5F">organisational only</text>
+  <rect x="740" y="496" width="108" height="60" rx="4" fill="#C8DCF4" stroke="#5B8DD9" stroke-width="0.5"/>
+  <text x="794" y="516" text-anchor="middle" font-size="11" font-weight="bold" fill="#1F3A5F">PharmacyField</text>
+  <text x="794" y="532" text-anchor="middle" font-size="10" fill="#1F3A5F">15 fields</text>
+  <text x="794" y="547" text-anchor="middle" font-size="10" fill="#1F3A5F">stock + clinical dose</text>
+
+  <!-- ══════════════════ ROW 4: model/ui ══════════════════ -->
+  <rect x="40" y="582" width="820" height="112" rx="10" fill="#F3E5F5" stroke="#8E24AA" stroke-width="1.2"/>
+  <text x="450" y="602" text-anchor="middle" font-size="13" font-weight="bold" fill="#4A0066">model / ui — UI contribution descriptors</text>
+  <rect x="52"  y="612" width="188" height="72" rx="4" fill="#DDB8E8" stroke="#8E24AA" stroke-width="0.5"/>
+  <text x="146" y="632" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E0044">UiContribution</text>
+  <text x="146" y="648" text-anchor="middle" font-size="10" fill="#2E0044">builder + consistency validation</text>
+  <text x="146" y="663" text-anchor="middle" font-size="10" fill="#2E0044">routes/slots require bundle</text>
+  <text x="146" y="678" text-anchor="middle" font-size="10" fill="#2E0044">bundle requires capability</text>
+  <rect x="250" y="612" width="188" height="72" rx="4" fill="#DDB8E8" stroke="#8E24AA" stroke-width="0.5"/>
+  <text x="344" y="632" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E0044">RouteDescriptor</text>
+  <text x="344" y="648" text-anchor="middle" font-size="10" fill="#2E0044">path · label · menuPath</text>
+  <text x="344" y="663" text-anchor="middle" font-size="10" fill="#2E0044">permission: PluginPermission?</text>
+  <text x="344" y="678" text-anchor="middle" font-size="10" fill="#2E0044">open()  ·  restricted()  factories</text>
+  <rect x="448" y="612" width="188" height="72" rx="4" fill="#DDB8E8" stroke="#8E24AA" stroke-width="0.5"/>
+  <text x="542" y="632" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E0044">SlotContribution</text>
+  <text x="542" y="648" text-anchor="middle" font-size="10" fill="#2E0044">slotId  (e.g. patient.header.actions)</text>
+  <text x="542" y="663" text-anchor="middle" font-size="10" fill="#2E0044">APPEND · PREPEND · REPLACE</text>
+  <text x="542" y="678" text-anchor="middle" font-size="10" fill="#2E0044">REPLACE: one plugin per slot only</text>
+  <rect x="646" y="612" width="202" height="72" rx="4" fill="#DDB8E8" stroke="#8E24AA" stroke-width="0.5"/>
+  <text x="747" y="632" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E0044">BundleDescriptor</text>
+  <text x="747" y="648" text-anchor="middle" font-size="10" fill="#2E0044">entry: path in ZIP</text>
+  <text x="747" y="663" text-anchor="middle" font-size="10" fill="#2E0044">remoteName: JS identifier</text>
+  <text x="747" y="678" text-anchor="middle" font-size="10" fill="#2E0044">Vite Module Federation remote</text>
+
+  <!-- ══════════════════ plugin-spi-test ══════════════════ -->
+  <rect x="40" y="710" width="820" height="122" rx="10" fill="#E8F5E9" stroke="#388E3C" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="450" y="730" text-anchor="middle" font-size="13" font-weight="bold" fill="#1B5E20">OH-plugin-spi-test — in-memory stubs  (scope: test)</text>
+  <rect x="52"  y="740" width="152" height="82" rx="4" fill="#C8E6C9" stroke="#388E3C" stroke-width="0.5"/>
+  <text x="128" y="760" text-anchor="middle" font-size="11" font-weight="bold" fill="#1B5E20">StubPluginContext</text>
+  <text x="128" y="776" text-anchor="middle" font-size="10" fill="#1B5E20">entry point for all tests</text>
+  <text x="128" y="791" text-anchor="middle" font-size="10" fill="#1B5E20">default: all GRANTED</text>
+  <text x="128" y="806" text-anchor="middle" font-size="10" fill="#1B5E20">builder for custom config</text>
+  <rect x="214" y="740" width="152" height="82" rx="4" fill="#C8E6C9" stroke="#388E3C" stroke-width="0.5"/>
+  <text x="290" y="760" text-anchor="middle" font-size="11" font-weight="bold" fill="#1B5E20">StubEventBus</text>
+  <text x="290" y="776" text-anchor="middle" font-size="10" fill="#1B5E20">subscribedTypes()</text>
+  <text x="290" y="791" text-anchor="middle" font-size="10" fill="#1B5E20">publishedEvents()</text>
+  <text x="290" y="806" text-anchor="middle" font-size="10" fill="#1B5E20">subscriberCount(type)</text>
+  <rect x="376" y="740" width="152" height="82" rx="4" fill="#C8E6C9" stroke="#388E3C" stroke-width="0.5"/>
+  <text x="452" y="760" text-anchor="middle" font-size="11" font-weight="bold" fill="#1B5E20">StubPatientStore</text>
+  <text x="452" y="776" text-anchor="middle" font-size="10" fill="#1B5E20">fluent builder for patients</text>
+  <text x="452" y="791" text-anchor="middle" font-size="10" fill="#1B5E20">.add(42).firstName(…).done()</text>
+  <text x="452" y="806" text-anchor="middle" font-size="10" fill="#1B5E20">+ StubDataAccessor</text>
+  <rect x="538" y="740" width="152" height="82" rx="4" fill="#C8E6C9" stroke="#388E3C" stroke-width="0.5"/>
+  <text x="614" y="760" text-anchor="middle" font-size="11" font-weight="bold" fill="#1B5E20">StubDataAccessor</text>
+  <text x="614" y="776" text-anchor="middle" font-size="10" fill="#1B5E20">accessedPatientCodes()</text>
+  <text x="614" y="791" text-anchor="middle" font-size="10" fill="#1B5E20">clearAccessLog()</text>
+  <text x="614" y="806" text-anchor="middle" font-size="10" fill="#1B5E20">null fields if not in store</text>
+  <rect x="700" y="740" width="148" height="82" rx="4" fill="#C8E6C9" stroke="#388E3C" stroke-width="0.5"/>
+  <text x="774" y="760" text-anchor="middle" font-size="11" font-weight="bold" fill="#1B5E20">StubHttpClient</text>
+  <text x="774" y="776" text-anchor="middle" font-size="10" fill="#1B5E20">fails loud on unexpected URLs</text>
+  <text x="774" y="791" text-anchor="middle" font-size="10" fill="#1B5E20">when(url).thenReturn(body)</text>
+  <text x="774" y="806" text-anchor="middle" font-size="10" fill="#1B5E20">requestedUrls()</text>
+
+  <!-- ══════════════════ PRIVACY DATA FLOW ══════════════════ -->
+  <line x1="40" y1="848" x2="860" y2="848" stroke="#CCCCCC" stroke-width="1" stroke-dasharray="5 4"/>
+  <text x="450" y="865" text-anchor="middle" font-size="11" fill="#888">privacy by design — data access flow</text>
+
+  <rect x="40"  y="876" width="130" height="52" rx="8" fill="#FDECEA" stroke="#D32F2F" stroke-width="1"/>
+  <text x="105" y="896" text-anchor="middle" font-size="11" font-weight="bold" fill="#7A1A1A">Domain event</text>
+  <text x="105" y="912" text-anchor="middle" font-size="10" fill="#7A1A1A">ID only — no PII</text>
+  <line x1="170" y1="902" x2="200" y2="902" stroke="#888" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <rect x="200" y="876" width="158" height="52" rx="8" fill="#FFF3E0" stroke="#E08000" stroke-width="1"/>
+  <text x="279" y="896" text-anchor="middle" font-size="11" font-weight="bold" fill="#7A4500">check(permission)</text>
+  <text x="279" y="912" text-anchor="middle" font-size="10" fill="#7A4500">GRANTED · DENIED_PLUGIN · DENIED_USER</text>
+  <line x1="358" y1="902" x2="388" y2="902" stroke="#888" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <rect x="388" y="876" width="166" height="52" rx="8" fill="#E3F4EC" stroke="#2E9E66" stroke-width="1"/>
+  <text x="471" y="896" text-anchor="middle" font-size="11" font-weight="bold" fill="#1A6640">withPatient(code, …)</text>
+  <text x="471" y="912" text-anchor="middle" font-size="10" fill="#1A6640">scope-bound · audited · field-filtered</text>
+  <line x1="554" y1="902" x2="584" y2="902" stroke="#888" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <rect x="584" y="876" width="276" height="52" rx="8" fill="#E8F0FB" stroke="#5B8DD9" stroke-width="1"/>
+  <text x="722" y="896" text-anchor="middle" font-size="11" font-weight="bold" fill="#1F5C99">PatientView</text>
+  <text x="722" y="912" text-anchor="middle" font-size="10" fill="#1F5C99">declared fields only — undeclared → null</text>
+
+  <!-- ══════════════════ CONSUMERS ══════════════════ -->
+  <line x1="40" y1="944" x2="860" y2="944" stroke="#CCCCCC" stroke-width="1" stroke-dasharray="5 4"/>
+  <text x="450" y="960" text-anchor="middle" font-size="11" fill="#888">consumers</text>
+
+  <rect x="40"  y="970" width="192" height="50" rx="8" fill="#E8F0FB" stroke="#5B8DD9" stroke-width="1"/>
+  <text x="136" y="990" text-anchor="middle" font-size="12" font-weight="bold" fill="#1F5C99">openhospital-core</text>
+  <text x="136" y="1007" text-anchor="middle" font-size="10" fill="#1F5C99">publishes domain events</text>
+
+  <rect x="244" y="970" width="192" height="50" rx="8" fill="#E8F0FB" stroke="#5B8DD9" stroke-width="1"/>
+  <text x="340" y="990" text-anchor="middle" font-size="12" font-weight="bold" fill="#1F5C99">openhospital-api</text>
+  <text x="340" y="1007" text-anchor="middle" font-size="10" fill="#1F5C99">implements PluginRegistry · PluginContext</text>
+
+  <rect x="448" y="970" width="192" height="50" rx="8" fill="#F5F5F5" stroke="#888" stroke-width="1"/>
+  <text x="544" y="990" text-anchor="middle" font-size="12" font-weight="bold" fill="#444">openhospital-gui</text>
+  <text x="544" y="1007" text-anchor="middle" font-size="10" fill="#666">JAR only · no Spring · future SwingRenderable</text>
+
+  <rect x="652" y="970" width="208" height="50" rx="8" fill="#F3E5F5" stroke="#8E24AA" stroke-width="1"/>
+  <text x="756" y="990" text-anchor="middle" font-size="12" font-weight="bold" fill="#4A0066">third-party plugin</text>
+  <text x="756" y="1007" text-anchor="middle" font-size="10" fill="#4A0066">implements OHPlugin · scope: provided</text>
+
+  <!-- ══════════════════ GUARANTEES ══════════════════ -->
+  <line x1="40" y1="1036" x2="860" y2="1036" stroke="#CCCCCC" stroke-width="1" stroke-dasharray="5 4"/>
+  <rect x="40"  y="1046" width="400" height="26" rx="6" fill="#FDECEA" stroke="#D32F2F" stroke-width="1"/>
+  <text x="240" y="1063" text-anchor="middle" font-size="11" fill="#7A1A1A">maven-enforcer: build FAILS if Spring / Hibernate / JPA enter classpath</text>
+  <rect x="452" y="1046" width="408" height="26" rx="6" fill="#F3E5F5" stroke="#8E24AA" stroke-width="1"/>
+  <text x="656" y="1063" text-anchor="middle" font-size="11" fill="#4A0066">JPMS module-info · no &lt;opens&gt; · setAccessible(true) → InaccessibleObjectException</text>
+  <rect x="40"  y="1080" width="820" height="26" rx="6" fill="#F5F5F5" stroke="#888" stroke-width="1"/>
+  <text x="450" y="1097" text-anchor="middle" font-size="11" fill="#444">pom.xml: no parent · slf4j-api + java.sql only · sources JAR · Surefire --add-opens for tests</text>
+  <rect x="40"  y="1114" width="820" height="26" rx="6" fill="#F5F5F5" stroke="#888" stroke-width="1"/>
+  <text x="450" y="1131" text-anchor="middle" font-size="11" fill="#444">META-INF/services/org.isf.plugin.spi.OHPlugin — ServiceLoader discovery</text>
+
+  <!-- stats + legend -->
+  <line x1="40" y1="1156" x2="860" y2="1156" stroke="#CCCCCC" stroke-width="1"/>
+  <text x="450" y="1174" text-anchor="middle" font-size="11" fill="#888">v7 — 28 source files · 8 packages · 96 tests · module-info.java · OH-plugin-spi-test companion artefact</text>
+
+  <rect x="52"  y="1190" width="12" height="12" rx="2" fill="#E8F0FB" stroke="#5B8DD9" stroke-width="1"/><text x="70"  y="1200" font-size="11" fill="#444">model · field</text>
+  <rect x="152" y="1190" width="12" height="12" rx="2" fill="#E3F4EC" stroke="#2E9E66" stroke-width="1"/><text x="170" y="1200" font-size="11" fill="#444">spi · hook</text>
+  <rect x="240" y="1190" width="12" height="12" rx="2" fill="#FFF3E0" stroke="#E08000" stroke-width="1"/><text x="258" y="1200" font-size="11" fill="#444">registry</text>
+  <rect x="320" y="1190" width="12" height="12" rx="2" fill="#FDECEA" stroke="#D32F2F" stroke-width="1"/><text x="338" y="1200" font-size="11" fill="#444">event</text>
+  <rect x="388" y="1190" width="12" height="12" rx="2" fill="#F3E5F5" stroke="#8E24AA" stroke-width="1"/><text x="406" y="1200" font-size="11" fill="#444">security · model/ui · third-party</text>
+  <rect x="560" y="1190" width="12" height="12" rx="2" fill="#E8F5E9" stroke="#388E3C" stroke-width="1"/><text x="578" y="1200" font-size="11" fill="#444">plugin-spi-test (dashed border)</text>
+  <rect x="738" y="1190" width="12" height="12" rx="2" fill="#F5F5F5" stroke="#888"    stroke-width="1"/><text x="756" y="1200" font-size="11" fill="#444">neutral / gui</text>
+
+  <line x1="40" y1="1214" x2="860" y2="1214" stroke="#CCCCCC" stroke-width="1"/>
+  <text x="450" y="1238" text-anchor="middle" font-size="10" fill="#AAA">Open Hospital · Informatici Senza Frontiere · https://www.open-hospital.org</text>
+
+</svg>

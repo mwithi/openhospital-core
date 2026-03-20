@@ -19,7 +19,7 @@
 
 	<groupId>org.isf</groupId>
 	<artifactId>OH-core</artifactId>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 	<version>1.15.0</version>
 
 	<properties>
@@ -29,7 +29,17 @@
 		<license.maven.plugin.version>5.0.0</license.maven.plugin.version>
 	</properties>
 
+	<modules>
+	  <module>plugin-spi</module>
+	  <module>plugin-spi-test</module>
+	</modules>
+
 	<dependencies>
+	    <dependency>
+		  <groupId>org.isf</groupId>
+		  <artifactId>OH-plugin-spi</artifactId>
+		  <version>1.0.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
