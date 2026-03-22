@@ -56,6 +56,20 @@
       <version>2.0.13</version>
     </dependency>
 
+    <!-- Test dependencies for running tests inside plugin-spi-test itself -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.26.3</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -72,6 +86,12 @@
             <arg>-Xlint:-processing</arg>
           </compilerArgs>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.1</version>
       </plugin>
 
       <!-- Produce a sources JAR so IDEs can navigate into stub code -->

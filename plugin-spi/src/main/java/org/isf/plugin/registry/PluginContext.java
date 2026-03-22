@@ -105,6 +105,22 @@ public interface PluginContext {
     PluginHttpClient httpClient();
 
     /**
+     * Sandboxed filesystem access for writing log files.
+     *
+     * <p>Only available if the plugin declared
+     * {@link org.isf.plugin.model.PluginCapability#LOG_FILE_WRITE}.
+     * Calling this method without that capability throws
+     * {@link UnsupportedOperationException}.
+     *
+     * @return the {@link PluginFileAccess} for this plugin's log directory
+     * @throws UnsupportedOperationException if {@code LOG_FILE_WRITE} was not declared
+     */
+    default PluginFileAccess files() {
+        throw new UnsupportedOperationException(
+            "This plugin did not declare PluginCapability.LOG_FILE_WRITE");
+    }
+
+    /**
      * SLF4J logger pre-configured with the pluginId as the logger name.
      *
      * @return SLF4J logger

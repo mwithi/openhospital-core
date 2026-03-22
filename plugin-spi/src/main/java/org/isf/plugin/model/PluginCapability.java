@@ -90,5 +90,17 @@ public enum PluginCapability {
      * The plugin makes calls to external systems (HTTP, HL7, FHIR, etc.).
      * Requires explicit configuration of allowed endpoints in the plugin policy file.
      */
-    EXTERNAL_INTEGRATION
+    EXTERNAL_INTEGRATION,
+
+    /**
+     * The plugin writes to its designated log directory on the OH server filesystem.
+     * The directory is isolated per plugin and configured in {@code settings.properties}
+     * via {@code plugin.log.dir}. The plugin can only write relative paths inside
+     * that directory — it cannot access any other path on the filesystem.
+     *
+     * <p>At runtime the absolute path is {@code ${plugin.log.dir}/${pluginId}/}.
+     * The plugin never sees the absolute path — it only uses relative names via
+     * {@link org.isf.plugin.registry.PluginContext#files()}.
+     */
+    LOG_FILE_WRITE
 }

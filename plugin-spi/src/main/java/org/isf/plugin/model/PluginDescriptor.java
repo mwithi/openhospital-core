@@ -13,8 +13,6 @@
  */
 package org.isf.plugin.model;
 
-import org.isf.plugin.model.FieldPermission;
-import org.isf.plugin.model.field.DomainField;
 import org.isf.plugin.model.ui.UiContribution;
 
 import java.util.Collections;
@@ -518,7 +516,6 @@ public final class PluginDescriptor {
                     "PluginCapability.UI_COMPONENT_OVERRIDE declared but " +
                     "no uiContribution specified");
             }
-
 
             return new PluginDescriptor(this);
         }

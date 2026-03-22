@@ -73,6 +73,7 @@ public final class StubPluginContext implements PluginContext {
     private final StubConfig            config;
     private final Logger                logger;
     private final PermissionCheckResult permissionResult;
+    private final StubFileAccess          fileAccess;
 
     private StubPluginContext(Builder builder) {
         this.patientStore     = new StubPatientStore();
@@ -81,6 +82,7 @@ public final class StubPluginContext implements PluginContext {
         this.httpClient       = new StubHttpClient();
         this.managers         = new StubManagerRegistry();
         this.config           = new StubConfig();
+        this.fileAccess       = new StubFileAccess();
         this.logger           = LoggerFactory.getLogger("stub.plugin." + builder.pluginId);
         this.permissionResult = builder.permissionResult;
         this.descriptor       = PluginDescriptor.builder()
@@ -123,6 +125,15 @@ public final class StubPluginContext implements PluginContext {
     // -------------------------------------------------------------------------
     // Extra accessors for test setup
     // -------------------------------------------------------------------------
+
+    @Override
+    public StubFileAccess files() {
+        if (!descriptor.getCapabilities().contains(PluginCapability.LOG_FILE_WRITE)) {
+            throw new UnsupportedOperationException(
+                "This plugin did not declare PluginCapability.LOG_FILE_WRITE");
+        }
+        return fileAccess;
+    }
 
     /**
      * Returns the patient store for pre-populating test data.

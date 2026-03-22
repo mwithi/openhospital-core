@@ -38,6 +38,7 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Verifies the lifecycle contract of {@link OHPlugin} using in-memory stub
@@ -146,6 +147,13 @@ class OHPluginLifecycleTest {
 
         assertThat(ex.getCheckResult()).isEqualTo(PermissionCheckResult.DENIED_USER);
         assertThat(ex.getMessage()).contains("role");
+    }
+
+    @Test
+    @DisplayName("files() throws UnsupportedOperationException by default")
+    void filesThrowsWhenCapabilityNotDeclared() {
+        assertThatThrownBy(() -> ctx.files())
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     // =========================================================================
