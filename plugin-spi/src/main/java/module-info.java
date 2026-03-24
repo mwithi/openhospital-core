@@ -39,9 +39,11 @@ module org.isf.plugin.spi {
     // Dependencies
     // -------------------------------------------------------------------------
 
-    // SLF4J API — the only runtime dependency.
-    // slf4j-api has had a module-info.java since version 1.8.
-    requires org.slf4j;
+    // SLF4J API — optional at compile time (requires static), mandatory at runtime
+    // for modules that actually use logging. Using "requires static" avoids the
+    // Eclipse JPMS error when slf4j-api is not yet installed in the local repo,
+    // while still allowing PluginContext.logger() to return org.slf4j.Logger.
+    requires static org.slf4j;
 
     // java.sql is needed by MigrationScript.MigrationContext (Connection type).
     // It is part of the JDK and always available.

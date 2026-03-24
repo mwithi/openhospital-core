@@ -21,12 +21,17 @@ import org.isf.plugin.registry.PluginContext;
  * Primary SPI interface that every Open Hospital plugin must implement.
  *
  * <p>The class implementing this interface is the one specified in the
- * {@code entryPoint} field of the {@link PluginDescriptor}.
+ * {@code entryPoint} field of {@code manifest.json}.
+ *
+ * <h3>Source of truth: manifest.json</h3>
+ * The plugin descriptor is defined exclusively in {@code manifest.json},
+ * which is read by the PluginManager before any plugin code runs.
+ * The plugin accesses its own descriptor via {@link PluginContext#getDescriptor()}.
+ * There is no {@code getDescriptor()} method on this interface — the manifest
+ * is the single source of truth, with no risk of divergence between code and JSON.
  *
  * <h3>Lifecycle contract</h3>
  * <ol>
- *   <li>{@link #getDescriptor()} — called immediately after instantiation;
- *       must return the same descriptor as the manifest.json.</li>
  *   <li>{@link #onInstall(PluginContext)} — called exactly once at first install.</li>
  *   <li>{@link #onStart(PluginContext)} — called on every system startup when ACTIVE.</li>
  *   <li>{@link #onStop(PluginContext)} — called before shutdown or disabling.</li>
@@ -41,35 +46,34 @@ import org.isf.plugin.registry.PluginContext;
  * <pre>{@code
  * public class RadiologyPlugin implements OHPlugin {
  *
- *     private static final PluginDescriptor DESCRIPTOR = PluginDescriptor.builder()
- *         .pluginId("org.isf.radiology")
- *         .version("1.0.0")
- *         .name("Radiology Module")
- *         .entryPoint("org.isf.radiology.RadiologyPlugin")
- *         .minCoreVersion("1.15.0")
- *         .capabilities(List.of(PluginCapability.API_EXTENSION))
- *         .permissions(List.of(PluginPermission.READ_PATIENT))
- *         .build();
- *
- *     public PluginDescriptor getDescriptor() { return DESCRIPTOR; }
- *
- *     public void onStart(PluginContext ctx) {
+ *     public void onStart(PluginContext ctx) throws OHPluginLifecycleException {
+ *         ctx.logger().info("Starting {}", ctx.getDescriptor().getName());
  *         ctx.eventBus().subscribe(
  *             OHDomainEvents.PatientCreated.class,
- *             event -> ctx.logger().info("New patient: {}", event.getLastName()));
+ *             event -> ctx.logger().info("New patient: {}", event.getPatientCode()));
  *     }
  * }
  * }</pre>
  */
 public interface OHPlugin {
 
+    /*
+     * Implementations must provide a public no-argument constructor.
+     * The plugin-maven-plugin uses it during mvn package to call
+     * getDescriptor() via reflection and generate manifest.json.
+     */
+
     /**
-     * Returns the immutable descriptor of this plugin.
+     * Returns the descriptor of this plugin.
      *
-     * <p>The recommended implementation is to return a compile-time static
-     * constant, not a new object on every call.
+     * <p>Used by the {@code plugin-maven-plugin} during {@code mvn package}
+     * to generate {@code manifest.json} via reflection — the Mojo instantiates
+     * the plugin with its no-argument constructor and calls this method.
      *
-     * @return the {@link PluginDescriptor} of this plugin
+     * <p>At runtime, {@code PluginContextImpl} cross-checks the returned
+     * descriptor against the manifest read from the JAR to verify consistency.
+     *
+     * @return the immutable {@link PluginDescriptor}, never null
      */
     PluginDescriptor getDescriptor();
 

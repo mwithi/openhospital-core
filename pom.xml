@@ -32,6 +32,7 @@
 	<modules>
 	  <module>plugin-spi</module>
 	  <module>plugin-spi-test</module>
+	  <module>plugin-maven-plugin</module>
 	</modules>
 
 	<dependencies>

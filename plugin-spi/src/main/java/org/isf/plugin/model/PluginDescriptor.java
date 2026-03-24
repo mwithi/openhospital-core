@@ -13,6 +13,7 @@
  */
 package org.isf.plugin.model;
 
+import org.isf.plugin.model.FieldPermission;
 import org.isf.plugin.model.ui.UiContribution;
 
 import java.util.Collections;

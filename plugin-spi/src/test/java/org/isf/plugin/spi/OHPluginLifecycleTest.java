@@ -17,11 +17,11 @@ import org.isf.plugin.event.OHDomainEvents;
 import org.isf.plugin.event.OHPluginEvent;
 import org.isf.plugin.event.PluginEventBus;
 import org.isf.plugin.hook.OHManagerExtension;
-import org.isf.plugin.model.PluginCapability;
-import org.isf.plugin.model.PluginDescriptor;
 import org.isf.plugin.model.PluginPermission;
 import org.isf.plugin.registry.PluginContext;
 import org.isf.plugin.model.PermissionCheckResult;
+import org.isf.plugin.model.PluginCapability;
+import org.isf.plugin.model.PluginDescriptor;
 import org.isf.plugin.registry.PluginContext.PluginAuthorizationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -83,12 +83,6 @@ class OHPluginLifecycleTest {
     void defaultLifecycleMethods() {
         assertThatNoException().isThrownBy(() -> plugin.onInstall(ctx));
         assertThatNoException().isThrownBy(() -> plugin.onUninstall(ctx));
-    }
-
-    @Test
-    @DisplayName("getDescriptor always returns the same immutable instance")
-    void descriptorIsAlwaysSameInstance() {
-        assertThat(plugin.getDescriptor()).isSameAs(plugin.getDescriptor());
     }
 
     @Test
@@ -170,7 +164,6 @@ class OHPluginLifecycleTest {
                 .entryPoint("org.isf.plugin.spi.OHPluginLifecycleTest$TrackingPlugin")
                 .minCoreVersion("1.15.0")
                 .capabilities(List.of(PluginCapability.EVENT_LISTENER))
-                .permissions(List.of(PluginPermission.READ_PATIENT))
                 .build();
 
         private boolean             started          = false;
@@ -252,7 +245,7 @@ class OHPluginLifecycleTest {
             return PluginDescriptor.builder()
                     .pluginId("org.isf.test")
                     .version("1.0.0")
-                    .name("Test")
+                    .name("Test Plugin")
                     .entryPoint("org.isf.test.TestPlugin")
                     .minCoreVersion("1.15.0")
                     .build();

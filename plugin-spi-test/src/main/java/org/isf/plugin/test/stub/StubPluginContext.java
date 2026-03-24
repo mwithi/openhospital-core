@@ -36,7 +36,7 @@ import java.util.Map;
  *
  * <h3>Minimal usage</h3>
  * <pre>{@code
- * StubPluginContext ctx = new StubPluginContext();
+ * StubPluginContext ctx = StubPluginContext.fromManifest("/manifest.json");
  * MyPlugin plugin = new MyPlugin();
  * plugin.onStart(ctx);
  *
@@ -92,6 +92,32 @@ public final class StubPluginContext implements PluginContext {
                 .entryPoint(builder.pluginId + ".StubPlugin")
                 .minCoreVersion(builder.minCoreVersion)
                 .capabilities(builder.capabilities)
+                .build();
+    }
+
+    /**
+     * Creates a context whose descriptor is read from the given classpath resource.
+     *
+     * <p>This is the recommended way to test a plugin — it uses the real
+     * {@code manifest.json} as the source of truth, so the test automatically
+     * reflects any change to the manifest without requiring test code updates.
+     *
+     * <pre>{@code
+     * StubPluginContext ctx = StubPluginContext.fromManifest("/manifest.json");
+     * }</pre>
+     *
+     * @param resourcePath classpath path to the manifest, e.g. {@code "/manifest.json"}
+     * @return a fully configured stub context
+     * @throws IllegalArgumentException if the resource is not found or is malformed
+     */
+    public static StubPluginContext fromManifest(String resourcePath) {
+        PluginDescriptor descriptor = ManifestReader.read(resourcePath);
+        return new Builder()
+                .pluginId(descriptor.getPluginId())
+                .version(descriptor.getVersion())
+                .name(descriptor.getName())
+                .minCoreVersion(descriptor.getMinCoreVersion())
+                .capabilities(descriptor.getCapabilities())
                 .build();
     }
 

@@ -13,14 +13,16 @@ declare, and request.
 
 - [Architecture overview](#architecture-overview)
 - [Quick start](#quick-start)
+- [Generating manifest.json](#generating-manifestjson)
 - [Package reference](#package-reference)
 - [Permission system](#permission-system)
 - [Privacy by design](#privacy-by-design)
+- [Filesystem access](#filesystem-access)
 - [UI contributions](#ui-contributions)
 - [Security guarantees](#security-guarantees)
 - [Testing your plugin](#testing-your-plugin)
 - [Integration into Open Hospital](#integration-into-open-hospital)
-- [Building](#building)
+- [Build order](#build-order)
 - [Version history](#version-history)
 
 ---
@@ -40,18 +42,36 @@ The SPI is the only dependency between a third-party plugin and OH. A plugin
 compiled against `spi:1.0.0` works on any OH release that supports that SPI
 version, regardless of internal Spring or Hibernate upgrades.
 
+The ecosystem consists of four related modules:
+
+| Module | Purpose |
+|--------|---------|
+| `OH-plugin-spi` | The public contract — interfaces, value objects, enums |
+| `OH-plugin-spi-test` | In-memory stubs for unit testing plugins |
+| `plugin-maven-plugin` | `generate-manifest` goal — produces `manifest.json` from code |
+| your plugin | Implements `OHPlugin`, uses the above |
+
 ---
 
 ## Quick start
 
-### 1. Add the dependency
+### 1. Add the dependencies
 
 ```xml
+<!-- Runtime dependency — OH provides it at runtime -->
 <dependency>
     <groupId>org.isf</groupId>
     <artifactId>OH-plugin-spi</artifactId>
     <version>1.0.0</version>
-    <scope>provided</scope>  <!-- OH provides it at runtime -->
+    <scope>provided</scope>
+</dependency>
+
+<!-- Test utilities — only in test scope -->
+<dependency>
+    <groupId>org.isf</groupId>
+    <artifactId>OH-plugin-spi-test</artifactId>
+    <version>1.0.0</version>
+    <scope>test</scope>
 </dependency>
 ```
 
@@ -61,7 +81,7 @@ version, regardless of internal Spring or Hibernate upgrades.
 public class MyPlugin implements OHPlugin {
 
     private static final PluginDescriptor DESCRIPTOR = PluginDescriptor.builder()
-        .pluginId("com.example.myplugin")        // reverse-domain format
+        .pluginId("com.example.myplugin")        // reverse-domain, no hyphens
         .version("1.0.0")                         // semver
         .name("My Plugin")
         .entryPoint("com.example.myplugin.MyPlugin")
@@ -76,7 +96,7 @@ public class MyPlugin implements OHPlugin {
     public PluginDescriptor getDescriptor() { return DESCRIPTOR; }
 
     @Override
-    public void onStart(PluginContext ctx) {
+    public void onStart(PluginContext ctx) throws OHPluginLifecycleException {
         ctx.eventBus().subscribe(
             OHDomainEvents.PatientCreated.class,
             event -> ctx.data().withPatient(
@@ -87,6 +107,9 @@ public class MyPlugin implements OHPlugin {
 }
 ```
 
+The `DESCRIPTOR` is the single source of truth. `manifest.json` is generated
+from it automatically — see [Generating manifest.json](#generating-manifestjson).
+
 ### 3. Register via ServiceLoader
 
 Create `src/main/resources/META-INF/services/org.isf.plugin.spi.OHPlugin`:
@@ -95,14 +118,84 @@ Create `src/main/resources/META-INF/services/org.isf.plugin.spi.OHPlugin`:
 com.example.myplugin.MyPlugin
 ```
 
-### 4. Package as ZIP
+### 4. Package structure
 
 ```
-myplugin-1.0.0.zip
-├── myplugin-1.0.0.jar
-├── manifest.json
-└── db/migration/          (optional — if DB_MIGRATION capability declared)
-    └── V1__initial.sql
+myplugin-1.0.0.jar          (produced by mvn package -P package-plugin)
+├── META-INF/services/org.isf.plugin.spi.OHPlugin
+├── manifest.json            (generated automatically — do not edit by hand)
+└── com/example/myplugin/
+    └── MyPlugin.class
+```
+
+---
+
+## Generating manifest.json
+
+`manifest.json` is generated automatically by the `plugin-maven-plugin` during
+`mvn package`. You never write or edit it by hand.
+
+### Setup
+
+First install the maven plugin locally (once, after cloning the repository):
+
+```bash
+cd openhospital-core/plugin-spi       && mvn clean install
+cd ../plugin-spi-test                  && mvn clean install
+cd ../plugin-maven-plugin              && mvn clean install
+```
+
+Then add the plugin to your plugin's `pom.xml` inside a profile:
+
+```xml
+<profiles>
+  <profile>
+    <id>package-plugin</id>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.isf</groupId>
+          <artifactId>plugin-maven-plugin</artifactId>
+          <version>1.0.0</version>
+          <executions>
+            <execution>
+              <goals><goal>generate-manifest</goal></goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+</profiles>
+```
+
+### Generate
+
+```bash
+mvn clean package -P package-plugin
+```
+
+The manifest is written to `target/classes/manifest.json` and included in the
+JAR automatically. Verify with:
+
+```bash
+jar tf target/myplugin-1.0.0.jar | grep manifest
+```
+
+### How it works
+
+The Mojo instantiates your `OHPlugin` class via reflection, calls
+`getDescriptor()`, and serialises the result to pretty-printed JSON using
+Jackson. The SPI itself has no JSON dependency — serialisation lives entirely
+in the Mojo. Your class must have a public no-argument constructor and
+`getDescriptor()` must not require any injected state.
+
+### Skip manifest generation
+
+To skip in CI pipelines that only run tests:
+
+```bash
+mvn clean verify -Dplugin.skipManifest=true
 ```
 
 ---
@@ -115,7 +208,7 @@ myplugin-1.0.0.zip
 | `model.field` | `DomainField`, `FieldSensitivity`, `PatientField`, `AdmissionField`, `LaboratoryField`, `WardField`, `PharmacyField` | Domain field catalogues with privacy sensitivity metadata |
 | `model.ui` | `UiContribution`, `RouteDescriptor`, `SlotContribution`, `BundleDescriptor` | Descriptors for React UI contributions |
 | `spi` | `OHPlugin`, `MigrationScript`, `OHPluginLifecycleException` | Primary lifecycle interfaces |
-| `registry` | `PluginContext`, `PluginDataAccessor`, `PatientView`, `PluginHttpClient` | Runtime gateway — the only contact point between a plugin and OH |
+| `registry` | `PluginContext`, `PluginDataAccessor`, `PatientView`, `PluginHttpClient`, `PluginFileAccess` | Runtime gateway — the only contact point between a plugin and OH |
 | `event` | `OHDomainEvents`, `OHPluginEvent`, `PluginEventBus` | ID-only domain events |
 | `hook` | `OHManagerExtension` | Chain-of-responsibility extension point for OH-core Managers |
 | `security` | `PluginSecurityPolicy`, `ValidationResult` | Install-time security policy SPI |
@@ -151,7 +244,7 @@ The type system prevents mixing fields from different domains in the same
 | `INTERNAL` | Organisational code | Not personal data |
 | `PERSONAL` | Identifies a person in society | Art. 4 |
 | `CLINICAL` | Describes a person as a patient | Art. 9 |
-| `SENSITIVE` | Universal identifier or socially stigmatised data (e.g. `TAX_CODE`, `hivStatus`) | Art. 9 + explicit admin approval |
+| `SENSITIVE` | Universal identifier or socially stigmatised data (e.g. `TAX_CODE`) | Art. 9 + explicit admin approval |
 
 ### Three-state permission check
 
@@ -173,9 +266,8 @@ if (ctx.check(READ_PATIENT).isDenied()) {
 }
 ```
 
-`DENIED_PLUGIN` means the plugin lacks the permission (not declared or not
-approved at install time). `DENIED_USER` means the plugin has the permission
-but the current user lacks the required OH role.
+`DENIED_PLUGIN` — the plugin lacks the permission (not declared or not approved).
+`DENIED_USER` — the plugin has the permission but the current user lacks the OH role.
 
 ---
 
@@ -183,10 +275,10 @@ but the current user lacks the required OH role.
 
 ### ID-only events
 
-All `OHDomainEvents` carry only opaque identifiers — never PII or clinical
-data. A `PatientCreated` event carries only `patientCode`. To access patient
-data, the plugin must explicitly call `ctx.data().withPatient(...)`, which
-requires a `READ` `FieldPermission` in the manifest and writes an audit entry.
+All `OHDomainEvents` carry only opaque identifiers — never PII or clinical data.
+`PatientCreated` carries only `patientCode`. To access patient data the plugin
+must call `ctx.data().withPatient(...)`, which requires a declared `FieldPermission`
+and writes an audit entry.
 
 ### Scope-bound data access
 
@@ -195,7 +287,7 @@ This prevents the plugin from caching patient data outside the request scope.
 
 ### Network allowlist
 
-Every outbound connection must be declared in the manifest as an
+Every outbound connection must be declared in the descriptor as an
 `ExternalConnection`. The `PluginClassLoader` (in `api`) blocks any connection
 to an undeclared host at runtime.
 
@@ -204,7 +296,28 @@ new ExternalConnection("pacs.hospital.org", 11112, "DICOM",
     "Send DICOM study to hospital PACS", Direction.OUTBOUND)
 ```
 
-A plugin can declare multiple connections — one per distinct host/port.
+---
+
+## Filesystem access
+
+A plugin that writes log files declares `LOG_FILE_WRITE` and uses `ctx.files()`:
+
+```java
+.capabilities(List.of(PluginCapability.EVENT_LISTENER, PluginCapability.LOG_FILE_WRITE))
+```
+
+```java
+try (Writer w = ctx.files().openLogWriter("audit.log", true)) {
+    w.write("[2024-01-15 10:23] CREATED - Mario Rossi (code: 42)\n");
+}
+```
+
+The plugin only sees relative paths inside its sandbox directory, configured
+in `settings.properties` via `plugin.log.dir`. Path traversal attempts
+(e.g. `../other-plugin/secret.log`) are rejected with `IllegalArgumentException`.
+
+Calling `ctx.files()` without the `LOG_FILE_WRITE` capability throws
+`UnsupportedOperationException`.
 
 ---
 
@@ -214,58 +327,48 @@ Plugins that contribute to the React UI declare a `UiContribution` block:
 
 ```java
 UiContribution.builder()
-    .bundle("ui/radiology.js", "radiologyPlugin")   // Module Federation remote
-    .route(RouteDescriptor.open(
-        "/radiology", "Radiology", "Modules.Radiology"))
-    .slot(new SlotContribution(
-        "patient.header.actions", SlotMode.APPEND))
+    .bundle("ui/radiology.js", "radiologyPlugin")
+    .route(RouteDescriptor.open("/radiology", "Radiology", "Modules.Radiology"))
+    .slot(new SlotContribution("patient.header.actions", SlotMode.APPEND))
     .build()
 ```
 
-**`RouteDescriptor`** declares a new page. The optional `permission` field
-uses `PluginPermission` — not OH role names. OH-ui currently performs
-authentication-only routing; permission-aware routing is planned for Phase 4.
+`RouteDescriptor` — declares a new page. The optional `permission` field uses
+`PluginPermission`, not OH role names. OH-ui currently performs authentication-only
+routing; permission-aware routing is planned for Phase 4.
 
-**`SlotContribution`** injects a React component into a named `<PluginSlot>`.
-Mode `REPLACE` is exclusive — only one plugin may replace a given slot.
+`SlotContribution` — injects a component into a named `<PluginSlot>`. Mode
+`REPLACE` is exclusive — only one plugin may replace a given slot.
 
-**`BundleDescriptor`** locates the JS bundle in the plugin ZIP and specifies
-the Module Federation `remoteName` (must be a valid JS identifier).
+`BundleDescriptor` — locates the JS bundle in the JAR and specifies the Module
+Federation `remoteName` (must be a valid JS identifier, no hyphens).
 
-`PluginDescriptor.build()` validates consistency: `UI_ROUTES` capability
-requires a `UiContribution` with at least one route; `UI_COMPONENT_OVERRIDE`
-requires at least one slot; a bundle without contributions is rejected.
+`PluginDescriptor.build()` validates consistency between declared capabilities
+and `UiContribution` content — mismatches cause an `IllegalArgumentException`.
 
 ---
 
 ## Security guarantees
 
-### Maven enforcer
+**Maven enforcer** — the build fails if Spring, Hibernate, or JPA enter the
+compile classpath. Executable documentation against accidental framework leakage.
 
-The build fails if Spring, Hibernate, or JPA enter the compile classpath.
-This is executable documentation — if someone adds a forbidden dependency
-by mistake, the build breaks immediately with a clear message.
+**JPMS encapsulation** — `module-info.java` exports all public packages but
+opens none. `setAccessible(true)` on any class in this module throws
+`InaccessibleObjectException` at runtime. A plugin cannot bypass `PluginContext`
+to reach the Spring `ApplicationContext` via reflection.
 
-### JPMS encapsulation
-
-`module-info.java` exports all public packages but opens none.
-`setAccessible(true)` on any class in this module throws
-`InaccessibleObjectException` at runtime, even for code running in the
-same JVM. A plugin cannot bypass `PluginContext` to reach the Spring
-`ApplicationContext` via reflection.
-
-### Install-time security policies
-
-The `PluginSecurityPolicy` SPI allows `openhospital-api` to register policies
-applied in sequence before any plugin is activated. Planned implementations:
-GPG signature, SHA-256 checksum, capability allowlist, semver compatibility,
-dependency resolution.
+**Install-time security policies** — `PluginSecurityPolicy` allows
+`openhospital-api` to register policies applied before any plugin is activated.
+Planned implementations: GPG signature, SHA-256 checksum, capability allowlist,
+semver compatibility, dependency resolution.
 
 ---
 
 ## Testing your plugin
 
-Add the test utilities artefact:
+Add the test utilities artefact (see `OH-plugin-spi-test` README for the full
+stub API reference):
 
 ```xml
 <dependency>
@@ -276,72 +379,75 @@ Add the test utilities artefact:
 </dependency>
 ```
 
-Then use `StubPluginContext` — no Spring, no database:
+Use `StubPluginContext` — no Spring, no database, no filesystem:
 
 ```java
-@Test
-void pluginSubscribesToPatientEvents() throws Exception {
-    StubPluginContext ctx = new StubPluginContext();
-    MyPlugin plugin = new MyPlugin();
-
+@BeforeEach
+void setUp() throws Exception {
+    ctx = StubPluginContext.builder()
+            .capabilities(List.of(PluginCapability.EVENT_LISTENER))
+            .build();
+    ctx.patientStore()
+       .add(42).firstName("Mario").lastName("Rossi").done();
+    plugin = new MyPlugin();
     plugin.onStart(ctx);
+}
 
+@Test
+void pluginSubscribesToPatientEvents() {
     assertThat(ctx.eventBus().subscribedTypes())
             .contains(OHDomainEvents.PatientCreated.class);
 }
 
 @Test
-void pluginLogsNewPatientName() throws Exception {
-    StubPluginContext ctx = new StubPluginContext();
-    ctx.patientStore()
-       .add(42).firstName("Mario").lastName("Rossi").done();
-
-    MyPlugin plugin = new MyPlugin();
-    plugin.onStart(ctx);
+void pluginReactsToPatientCreated() {
     ctx.eventBus().publish(new OHDomainEvents.PatientCreated(42));
-
     assertThat(ctx.data().accessedPatientCodes()).containsExactly(42);
-}
-
-@Test
-void pluginHandlesDeniedPermission() throws Exception {
-    StubPluginContext ctx = new StubPluginContext(PermissionCheckResult.DENIED_USER);
-    MyPlugin plugin = new MyPlugin();
-    plugin.onStart(ctx);
-
-    // verify the plugin behaves correctly when permission is denied
-    assertThat(plugin.getLastError()).contains("role");
 }
 ```
 
-See the `OH-plugin-spi-test` README for the full stub API reference.
+For plugins that write log files, use `StubFileAccess`:
+
+```java
+ctx = StubPluginContext.builder()
+        .capabilities(List.of(
+                PluginCapability.EVENT_LISTENER,
+                PluginCapability.LOG_FILE_WRITE))
+        .build();
+// ...
+ctx.eventBus().publish(new OHDomainEvents.PatientCreated(42));
+assertThat(ctx.files().writtenTo("audit.log")).contains("Mario Rossi");
+```
 
 ---
 
 ## Integration into Open Hospital
 
-This module is designed to live as a submodule of `openhospital-core`:
+All four modules live inside `openhospital-core` as submodules:
 
 ```
 openhospital-core/
-├── pom.xml                    (add <module>plugin-spi</module>)
+├── pom.xml                      (lists all four modules)
 ├── plugin-spi/
-│   ├── pom.xml
-│   └── src/
-└── src/
+├── plugin-spi-test/
+├── plugin-maven-plugin/
+└── src/                         (openhospital-core own sources)
 ```
 
-**Two-step build** on first setup:
-
-```bash
-cd plugin-spi && mvn clean install
-cd ..         && mvn clean install
-```
-
-**Dependencies in sibling modules:**
+Add to `openhospital-core/pom.xml`:
 
 ```xml
-<!-- in openhospital-core, openhospital-api, openhospital-gui pom.xml -->
+<modules>
+    <module>plugin-spi</module>
+    <module>plugin-spi-test</module>
+    <module>plugin-maven-plugin</module>
+</modules>
+```
+
+Dependencies in sibling modules:
+
+```xml
+<!-- openhospital-core, openhospital-api, openhospital-gui -->
 <dependency>
     <groupId>org.isf</groupId>
     <artifactId>OH-plugin-spi</artifactId>
@@ -349,19 +455,40 @@ cd ..         && mvn clean install
 </dependency>
 ```
 
-**Eclipse:** File → Import → Maven → Existing Maven Projects → select the
-`plugin-spi/` folder.
+**Eclipse:** File → Import → Maven → Existing Maven Projects → select each
+submodule folder individually.
 
 ---
 
-## Building
+## Build order
+
+### First setup (once after cloning)
 
 ```bash
-# compile and run all 96 tests
-mvn clean verify
+cd openhospital-core/plugin-spi       && mvn clean install
+cd ../plugin-spi-test                  && mvn clean install
+cd ../plugin-maven-plugin              && mvn clean install
+cd ../..                               && mvn clean install
+```
 
-# install to local Maven repository (required before building core)
-mvn clean install
+### Developing a plugin
+
+```bash
+# run tests only
+cd my-plugin && mvn clean test
+
+# build JAR with generated manifest.json
+cd my-plugin && mvn clean package -P package-plugin
+
+# force re-resolution after first failed attempt
+cd my-plugin && mvn clean package -P package-plugin -U
+```
+
+### Verify JAR contains manifest
+
+```bash
+jar tf target/myplugin-1.0.0.jar | grep manifest
+# should print: manifest.json
 ```
 
 Requirements: Java 17+, Maven 3.8+.
@@ -375,7 +502,8 @@ Requirements: Java 17+, Maven 3.8+.
 | v1 | Core SPI — `OHPlugin`, `PluginContext`, events, hooks, security |
 | v2 | Bug fixes — FQCN pattern, Eclipse project files |
 | v3 | Privacy by design — `ExternalConnection`, ID-only events, `PluginDataAccessor` |
-| v4 | Field-level permissions — `FieldPermission`, `PatientField`, `AdmissionField`, `LaboratoryField`, `WardField`, `PharmacyField` |
-| v5 | JPMS `module-info.java`, Surefire `--add-opens`, clean import pass |
-| v6 | Three-state `PermissionCheckResult`, single `check()` method replaces three |
+| v4 | Field-level permissions — `FieldPermission`, domain field enums |
+| v5 | JPMS `module-info.java`, Surefire `--add-opens`, import cleanup |
+| v6 | Three-state `PermissionCheckResult`, single `check()` method |
 | v7 | UI contributions — `UiContribution`, `RouteDescriptor`, `SlotContribution`, `BundleDescriptor` |
+| v8 | `PluginFileAccess` + `LOG_FILE_WRITE`, `getDescriptor()` on `OHPlugin`, `plugin-maven-plugin` with `generate-manifest` goal using Jackson — `toJson()` moved out of SPI into Mojo |

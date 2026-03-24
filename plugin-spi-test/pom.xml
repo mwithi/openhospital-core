@@ -49,6 +49,13 @@
       <version>${spi.version}</version>
     </dependency>
 
+    <!-- Minimal JSON parser for reading manifest.json in StubPluginContext.fromManifest() -->
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20240303</version>
+    </dependency>
+
     <!-- SLF4J simple binding — gives tests a real logger without Logback -->
     <dependency>
       <groupId>org.slf4j</groupId>
