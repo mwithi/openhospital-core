@@ -1,6 +1,6 @@
 /*
  * Open Hospital (www.open-hospital.org)
- * Copyright © 2006-2024 Informatici Senza Frontiere (info@informaticisenzafrontiere.org)
+ * Copyright © 2006-2026 Informatici Senza Frontiere (info@informaticisenzafrontiere.org)
  *
  * Open Hospital is a free and open source software for healthcare data management.
  *
@@ -37,45 +37,7 @@ import java.util.ServiceLoader;
  * Generates {@code manifest.json} from the plugin's {@link OHPlugin} implementation.
  *
  * <p>Binds to the {@code prepare-package} phase so the manifest is written
- * into {@code target/classes/} before the JAR is assembled, and is therefore
- * included in the final JAR automatically without any additional configuration.
- *
- * <h3>How it works</h3>
- * <ol>
- *   <li>Builds a {@link URLClassLoader} from the project's compile classpath.</li>
- *   <li>Uses {@link ServiceLoader} to find all classes that implement
- *       {@link OHPlugin} — the class must be registered in
- *       {@code META-INF/services/org.isf.plugin.spi.OHPlugin}.</li>
- *   <li>Instantiates each class with its no-argument constructor.</li>
- *   <li>Calls {@link OHPlugin#getDescriptor()} to obtain the
- *       {@link PluginDescriptor}.</li>
- *   <li>Calls {@link PluginDescriptor#toJson()} and writes the result to
- *       {@code target/classes/manifest.json}.</li>
- * </ol>
- *
- * <h3>Usage in the plugin's pom.xml</h3>
- * <pre>{@code
- * <plugin>
- *   <groupId>org.isf</groupId>
- *   <artifactId>plugin-maven-plugin</artifactId>
- *   <version>1.0.0</version>
- *   <executions>
- *     <execution>
- *       <goals><goal>generate-manifest</goal></goals>
- *     </execution>
- *   </executions>
- * </plugin>
- * }</pre>
- *
- * <h3>Requirements</h3>
- * The plugin class must:
- * <ul>
- *   <li>implement {@link OHPlugin}</li>
- *   <li>be registered in {@code META-INF/services/org.isf.plugin.spi.OHPlugin}</li>
- *   <li>provide a public no-argument constructor</li>
- *   <li>return a fully populated {@link PluginDescriptor} from
- *       {@link OHPlugin#getDescriptor()} without requiring any injected state</li>
- * </ul>
+ * into {@code target/classes/} before the JAR is assembled.
  */
 @Mojo(
     name                  = "generate-manifest",
@@ -114,7 +76,7 @@ public class GenerateManifestMojo extends AbstractMojo {
      * Set to {@code true} to skip manifest generation entirely.
      * Useful for CI pipelines that build the SPI itself.
      */
-    @Parameter(defaultValue = "false", property = "plugin.skipManifest")
+    @Parameter(defaultValue = "false", property = "oh.plugin.skipManifest")
     private boolean skip;
 
     // -------------------------------------------------------------------------
@@ -122,15 +84,14 @@ public class GenerateManifestMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
-            getLog().info("oh:generate-manifest skipped (plugin.skipManifest=true)");
+            getLog().info("oh:generate-manifest skipped (oh.plugin.skipManifest=true)");
             return;
         }
 
         getLog().info("oh:generate-manifest — generating " + manifestFileName);
 
         URLClassLoader classLoader = buildClassLoader();
-
-        List<OHPlugin> plugins = loadPlugins(classLoader);
+        List<OHPlugin> plugins     = loadPlugins(classLoader);
 
         if (plugins.isEmpty()) {
             throw new MojoFailureException(
@@ -140,9 +101,8 @@ public class GenerateManifestMojo extends AbstractMojo {
         }
         if (plugins.size() > 1) {
             throw new MojoFailureException(
-                "oh:generate-manifest — found " + plugins.size() + " OHPlugin " +
-                "implementations. Each plugin JAR must contain exactly one " +
-                "OHPlugin implementation.");
+                "oh:generate-manifest — found " + plugins.size() +
+                " OHPlugin implementations. Each plugin JAR must contain exactly one.");
         }
 
         OHPlugin plugin = plugins.get(0);
@@ -190,7 +150,6 @@ public class GenerateManifestMojo extends AbstractMojo {
             throws MojoExecutionException {
         ServiceLoader<OHPlugin> loader =
                 ServiceLoader.load(OHPlugin.class, classLoader);
-
         List<OHPlugin> found = new ArrayList<>();
         try {
             for (OHPlugin plugin : loader) {
@@ -213,7 +172,7 @@ public class GenerateManifestMojo extends AbstractMojo {
             Files.writeString(target, DescriptorSerializer.toJson(descriptor));
         } catch (Exception e) {
             throw new MojoExecutionException(
-                "generate-manifest — failed to write " + target, e);
+                "oh:generate-manifest — failed to write " + target, e);
         }
     }
 }
