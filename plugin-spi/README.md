@@ -13,7 +13,7 @@ declare, and request.
 
 - [Architecture overview](#architecture-overview)
 - [Quick start](#quick-start)
-- [Generating manifest.json](#generating-manifestjson)
+- [Generating manifest.json](#generating-manifest-json)
 - [Package reference](#package-reference)
 - [Permission system](#permission-system)
 - [Privacy by design](#privacy-by-design)
@@ -108,7 +108,7 @@ public class MyPlugin implements OHPlugin {
 ```
 
 The `DESCRIPTOR` is the single source of truth. `manifest.json` is generated
-from it automatically — see [Generating manifest.json](#generating-manifestjson).
+from it automatically — see [Generating manifest.json](#generating-manifest-json).
 
 ### 3. Register via ServiceLoader
 
