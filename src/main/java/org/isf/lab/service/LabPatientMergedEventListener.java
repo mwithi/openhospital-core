@@ -24,8 +24,8 @@ package org.isf.lab.service;
 import java.util.List;
 
 import org.isf.lab.model.Laboratory;
+import org.isf.patient.event.PatientMergedEvent;
 import org.isf.patient.model.Patient;
-import org.isf.patient.model.PatientMergedEvent;
 import org.isf.utils.exception.OHServiceException;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

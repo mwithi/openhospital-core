@@ -23,7 +23,7 @@ package org.isf.patvac.service;
 
 import java.util.List;
 
-import org.isf.patient.model.PatientMergedEvent;
+import org.isf.patient.event.PatientMergedEvent;
 import org.isf.patvac.model.PatientVaccine;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

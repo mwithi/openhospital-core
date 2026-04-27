@@ -31,6 +31,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.hibernate.Hibernate;
+import org.isf.admission.event.AdmissionDischargedEvent;
+import org.isf.admission.event.AdmissionStartedEvent;
+import org.isf.admission.event.AdmissionUpdatedEvent;
 import org.isf.admission.model.Admission;
 import org.isf.admission.model.AdmittedPatient;
 import org.isf.admtype.model.AdmissionType;
@@ -46,6 +49,8 @@ import org.isf.utils.exception.OHServiceException;
 import org.isf.utils.pagination.PageInfo;
 import org.isf.utils.pagination.PagedResponse;
 import org.isf.utils.time.TimeTools;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -64,10 +69,13 @@ public class AdmissionIoOperations {
 
 	private PatientIoOperationRepository patientRepository;
 
+	@Autowired
+	private ApplicationEventPublisher applicationEventPublisher;
+
 	public AdmissionIoOperations(AdmissionIoOperationRepository admissionIoOperationRepository,
-	                             AdmissionTypeIoOperationRepository admissionTypeIoOperationRepository,
-	                             DischargeTypeIoOperationRepository dischargeTypeIoOperationRepository,
-	                             PatientIoOperationRepository patientIoOperationRepository) {
+		AdmissionTypeIoOperationRepository admissionTypeIoOperationRepository,
+		DischargeTypeIoOperationRepository dischargeTypeIoOperationRepository,
+		PatientIoOperationRepository patientIoOperationRepository) {
 		this.repository = admissionIoOperationRepository;
 		this.typeRepository = admissionTypeIoOperationRepository;
 		this.dischargeRepository = dischargeTypeIoOperationRepository;
@@ -107,7 +115,7 @@ public class AdmissionIoOperations {
 	 * @throws OHServiceException if an error occurs during database request.
 	 */
 	public List<AdmittedPatient> getAdmittedPatients(String searchTerms, LocalDateTime[] admissionRange, LocalDateTime[] dischargeRange)
-					throws OHServiceException {
+		throws OHServiceException {
 		return repository.findPatientAdmissionsBySearchAndDateRanges(searchTerms, admissionRange, dischargeRange);
 	}
 
@@ -167,6 +175,7 @@ public class AdmissionIoOperations {
 	 * @throws OHServiceException if an error occurs during the insertion.
 	 */
 	public Admission newAdmission(Admission admission) throws OHServiceException {
+		applicationEventPublisher.publishEvent(new AdmissionStartedEvent(admission));
 		return repository.save(admission);
 	}
 
@@ -190,6 +199,11 @@ public class AdmissionIoOperations {
 	 * @throws OHServiceException if an error occurs.
 	 */
 	public Admission updateAdmission(Admission admission) throws OHServiceException {
+		if (admission.getDisDate() != null) {
+			applicationEventPublisher.publishEvent(new AdmissionDischargedEvent(admission));
+		} else {
+			applicationEventPublisher.publishEvent(new AdmissionUpdatedEvent(admission));
+		}
 		return repository.save(admission);
 	}
 
@@ -248,11 +262,9 @@ public class AdmissionIoOperations {
 	}
 
 	/**
-	 * The variables, {@code testing} and {@code afterJune}, are here only for testing purposes and are **NOT** to be used
-	 * in production code.
-	 * The default path ({@code testing == false}) ensures that the code performs as it
-	 * always has in the past.
-	 * This code permits the unit testing of maternity wards with dates before and after June.
+	 * The variables, {@code testing} and {@code afterJune}, are here only for testing purposes and are **NOT** to be used in production code. The default path
+	 * ({@code testing == false}) ensures that the code performs as it always has in the past. This code permits the unit testing of maternity wards with dates
+	 * before and after June.
 	 */
 	public static boolean testing;
 	public static boolean afterJune;

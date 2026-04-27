@@ -23,7 +23,7 @@ package org.isf.visits.service;
 
 import java.util.List;
 
-import org.isf.patient.model.PatientMergedEvent;
+import org.isf.patient.event.PatientMergedEvent;
 import org.isf.utils.exception.OHServiceException;
 import org.isf.visits.model.Visit;
 import org.springframework.context.event.EventListener;

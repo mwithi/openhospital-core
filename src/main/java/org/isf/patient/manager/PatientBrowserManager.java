@@ -1,6 +1,6 @@
 /*
  * Open Hospital (www.open-hospital.org)
- * Copyright © 2006-2025 Informatici Senza Frontiere (info@informaticisenzafrontiere.org)
+ * Copyright © 2006-2026 Informatici Senza Frontiere (info@informaticisenzafrontiere.org)
  *
  * Open Hospital is a free and open source software for healthcare data management.
  *
@@ -66,8 +66,7 @@ public class PatientBrowserManager {
 	 *
 	 * @param patient
 	 * @return saved / updated {@link Patient}
-	 * @throws OHServiceException
-	 *             when validation failed
+	 * @throws OHServiceException when validation failed
 	 */
 	public Patient savePatient(Patient patient) throws OHServiceException {
 		validatePatient(patient);
@@ -93,7 +92,7 @@ public class PatientBrowserManager {
 	public List<Patient> getPatient(int page, int size) throws OHServiceException {
 		return ioOperations.getPatients(PageRequest.of(page, size));
 	}
-	
+
 	public PagedResponse<Patient> getPatientsPageable(int page, int size) throws OHServiceException {
 		return ioOperations.getPatientsPageable(PageRequest.of(page, size));
 	}
@@ -256,8 +255,7 @@ public class PatientBrowserManager {
 	/**
 	 * Method that logically deletes a {@link Patient} (not physically deleted).
 	 *
-	 * @param patient
-	 *            the {@link Patient} to be deleted
+	 * @param patient the {@link Patient} to be deleted
 	 * @throws OHServiceException
 	 */
 	public void deletePatient(Patient patient) throws OHServiceException {
@@ -265,11 +263,10 @@ public class PatientBrowserManager {
 	}
 
 	/**
-	 * Method that checks if the {@link Patient}'s name is already present in the DB (the passed string 'name' should
-	 * be a concatenation of firstName + " " + secondName).
+	 * Method that checks if the {@link Patient}'s name is already present in the DB (the passed string 'name' should be a concatenation of firstName + " " +
+	 * secondName).
 	 *
-	 * @param name
-	 *            - name of the patient
+	 * @param name - name of the patient
 	 * @return true - if the {@link Patient} is already present
 	 * @throws OHServiceException
 	 */
@@ -285,8 +282,7 @@ public class PatientBrowserManager {
 	 * - taxCode<br>
 	 * - note<br>
 	 *
-	 * @param keyword
-	 *            - String to search, {@code null} for full list
+	 * @param keyword - String to search, {@code null} for full list
 	 * @return the list of {@link Patient}s (could be empty)
 	 * @throws OHServiceException
 	 */
@@ -422,7 +418,7 @@ public class PatientBrowserManager {
 	public List<String> getCities() throws OHServiceException {
 		return ioOperations.getCities();
 	}
-	
+
 	/**
 	 * Method that returns the list of {@link Patient}s with specified codes.
 	 *

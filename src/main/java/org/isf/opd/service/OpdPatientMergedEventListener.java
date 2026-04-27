@@ -24,7 +24,7 @@ package org.isf.opd.service;
 import java.util.List;
 
 import org.isf.opd.model.Opd;
-import org.isf.patient.model.PatientMergedEvent;
+import org.isf.patient.event.PatientMergedEvent;
 import org.isf.utils.exception.OHServiceException;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

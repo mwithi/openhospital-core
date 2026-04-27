@@ -30,9 +30,12 @@ import jakarta.persistence.EntityManager;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.isf.generaldata.GeneralData;
+import org.isf.patient.event.PatientCreatedEvent;
+import org.isf.patient.event.PatientDeletedEvent;
+import org.isf.patient.event.PatientMergedEvent;
 import org.isf.patient.model.Patient;
-import org.isf.patient.model.PatientMergedEvent;
 import org.isf.patient.model.PatientProfilePhoto;
+import org.isf.patient.model.PatientUpdatedEvent;
 import org.isf.utils.db.TranslateOHServiceException;
 import org.isf.utils.exception.OHServiceException;
 import org.isf.utils.exception.model.OHExceptionMessage;
@@ -65,7 +68,8 @@ public class PatientIoOperations {
 
 	private final EntityManager entityManager;
 
-	public PatientIoOperations(PatientIoOperationRepository repository, ApplicationEventPublisher applicationEventPublisher, FileSystemPatientPhotoRepository fileSystemPatientPhotoRepository, EntityManager entityManager) {
+	public PatientIoOperations(PatientIoOperationRepository repository, ApplicationEventPublisher applicationEventPublisher,
+		FileSystemPatientPhotoRepository fileSystemPatientPhotoRepository, EntityManager entityManager) {
 		this.repository = repository;
 		this.applicationEventPublisher = applicationEventPublisher;
 		this.fileSystemPatientPhotoRepository = fileSystemPatientPhotoRepository;
@@ -90,7 +94,7 @@ public class PatientIoOperations {
 	public List<Patient> getPatients(Pageable pageable) throws OHServiceException {
 		return repository.findAllByDeletedIsNullOrDeletedEqualsOrderByName('N', pageable).getContent();
 	}
-	
+
 	public PagedResponse<Patient> getPatientsPageable(Pageable pageable) throws OHServiceException {
 		Page<Patient> pagedResult = repository.findAllByDeletedIsNullOrDeletedEqualsOrderByName('N', pageable);
 		return setPaginationData(pagedResult);
@@ -108,8 +112,7 @@ public class PatientIoOperations {
 	}
 
 	/**
-	 * Method that returns the full list of {@link Patient}s not logically deleted, having
-	 * the passed String in:<br>
+	 * Method that returns the full list of {@link Patient}s not logically deleted, having the passed String in:<br>
 	 * - code<br>
 	 * - firstName<br>
 	 * - secondName<br>
@@ -162,7 +165,7 @@ public class PatientIoOperations {
 	 * Get a {@link Patient} by his/her ID, even if he/her has been logically deleted.
 	 *
 	 * @param code
-	 * @return  the {@link Patient} that matches the specified ID or {@code null}.
+	 * @return the {@link Patient} that matches the specified ID or {@code null}.
 	 * @throws OHServiceException
 	 */
 	public Patient getPatientAll(Integer code) throws OHServiceException {
@@ -194,6 +197,7 @@ public class PatientIoOperations {
 			} else if (this.fileSystemPatientPhotoRepository.exist(GeneralData.PATIENTPHOTOSTORAGE, patient.getCode())) {
 				this.fileSystemPatientPhotoRepository.delete(GeneralData.PATIENTPHOTOSTORAGE, patient.getCode());
 			}
+			applicationEventPublisher.publishEvent(new PatientCreatedEvent(patientSaved));
 			return patientSaved;
 		} catch (OHServiceException e) {
 			LOGGER.error("Exception in savePatient method.", e);
@@ -209,6 +213,7 @@ public class PatientIoOperations {
 	 * @throws OHServiceException
 	 */
 	public Patient updatePatient(Patient patient) throws OHServiceException {
+		applicationEventPublisher.publishEvent(new PatientUpdatedEvent(patient));
 		return repository.save(patient);
 	}
 
@@ -231,12 +236,13 @@ public class PatientIoOperations {
 		} else {
 			fileSystemPatientPhotoRepository.delete(GeneralData.PATIENTPHOTOSTORAGE, patient.getCode());
 		}
+		applicationEventPublisher.publishEvent(new PatientDeletedEvent(patient.getCode()));
 		repository.updateDeleted(patient.getCode());
 	}
 
 	/**
-	 * Method that check if a {@link Patient}  is already present in the DB by his/her name
-	 * (the passed string 'name' should be a concatenation of firstName + " " + secondName),
+	 * Method that check if a {@link Patient} is already present in the DB by his/her name (the passed string 'name' should be a concatenation of firstName + "
+	 * " + secondName),
 	 *
 	 * @param name
 	 * @return true - if the patient is already present
@@ -300,13 +306,13 @@ public class PatientIoOperations {
 		return patient.getPatientProfilePhoto();
 	}
 
-	PagedResponse<Patient> setPaginationData(Page<Patient> pages){
+	PagedResponse<Patient> setPaginationData(Page<Patient> pages) {
 		PagedResponse<Patient> data = new PagedResponse<>();
 		data.setData(pages.getContent());
 		data.setPageInfo(PageInfo.from(pages));
 		return data;
 	}
-  
+
 	/**
 	 * Count all active {@link Patient}s
 	 * 

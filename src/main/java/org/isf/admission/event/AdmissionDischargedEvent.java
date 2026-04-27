@@ -1,6 +1,6 @@
 /*
  * Open Hospital (www.open-hospital.org)
- * Copyright © 2006-2023 Informatici Senza Frontiere (info@informaticisenzafrontiere.org)
+ * Copyright © 2006-2026 Informatici Senza Frontiere (info@informaticisenzafrontiere.org)
  *
  * Open Hospital is a free and open source software for healthcare data management.
  *
@@ -19,33 +19,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-package org.isf.patient;
+package org.isf.admission.event;
 
-import org.isf.patient.event.PatientMergedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
+import org.isf.admission.model.Admission;
 
-@Component
-public class TestPatientMergedEventListener {
-
-	private PatientMergedEvent patientMergedEvent;
-
-	private boolean shouldFail;
-
-	@EventListener
-	public void handle(PatientMergedEvent patientMergedEvent) {
-		this.patientMergedEvent = patientMergedEvent;
-		if (shouldFail) {
-			throw new RuntimeException("failure testing");
-		}
-	}
-
-	public PatientMergedEvent getPatientMergedEvent() {
-		return patientMergedEvent;
-	}
-
-	public void setShouldFail(boolean shouldFail) {
-		this.shouldFail = shouldFail;
-	}
-
+public record AdmissionDischargedEvent(Admission admission) {
 }

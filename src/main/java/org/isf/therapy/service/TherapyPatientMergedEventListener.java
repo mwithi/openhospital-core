@@ -23,7 +23,7 @@ package org.isf.therapy.service;
 
 import java.util.List;
 
-import org.isf.patient.model.PatientMergedEvent;
+import org.isf.patient.event.PatientMergedEvent;
 import org.isf.therapy.model.TherapyRow;
 import org.isf.utils.exception.OHServiceException;
 import org.springframework.context.event.EventListener;

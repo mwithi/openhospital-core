@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.isf.lab.event.LaboratoryExamCreatedEvent;
 import org.isf.lab.model.Laboratory;
 import org.isf.lab.model.LaboratoryForPrint;
 import org.isf.lab.model.LaboratoryRow;
@@ -37,6 +38,8 @@ import org.isf.utils.exception.model.OHExceptionMessage;
 import org.isf.utils.pagination.PageInfo;
 import org.isf.utils.pagination.PagedResponse;
 import org.isf.utils.time.TimeTools;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +54,9 @@ public class LabIoOperations {
 	private LabIoOperationRepository repository;
 
 	private LabRowIoOperationRepository rowRepository;
+
+	@Autowired
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	public LabIoOperations(LabIoOperationRepository labIoOperationRepository, LabRowIoOperationRepository labRowIoOperationRepository) {
 		this.repository = labIoOperationRepository;
@@ -92,7 +98,7 @@ public class LabIoOperations {
 	/**
 	 * Return the whole list of exams ({@link Laboratory}s) within the last week.
 	 *
-	 * @return the list of {@link Laboratory}s 
+	 * @return the list of {@link Laboratory}s
 	 * @throws OHServiceException
 	 */
 	public List<Laboratory> getLaboratory() throws OHServiceException {
@@ -107,15 +113,15 @@ public class LabIoOperations {
 	 * @param exam - the exam name as {@code String}
 	 * @param dateFrom - the lower date for the range
 	 * @param dateTo - the highest date for the range
-	 * @return the list of {@link Laboratory}s 
+	 * @return the list of {@link Laboratory}s
 	 * @throws OHServiceException
 	 */
 	public List<Laboratory> getLaboratory(String exam, LocalDateTime dateFrom, LocalDateTime dateTo) throws OHServiceException {
 		return exam != null ? repository.findByLabDateBetweenAndExamDescriptionOrderByLabDateDesc(TimeTools.truncateToSeconds(dateFrom),
-						TimeTools.truncateToSeconds(dateTo),
-						exam)
-						: repository.findByLabDateBetweenOrderByLabDateDesc(TimeTools.truncateToSeconds(dateFrom.with(LocalTime.MIN)),
-										TimeTools.truncateToSeconds(dateTo.with(LocalTime.MAX)));
+			TimeTools.truncateToSeconds(dateTo),
+			exam)
+			: repository.findByLabDateBetweenOrderByLabDateDesc(TimeTools.truncateToSeconds(dateFrom.with(LocalTime.MIN)),
+				TimeTools.truncateToSeconds(dateTo.with(LocalTime.MAX)));
 	}
 
 	/**
@@ -124,8 +130,8 @@ public class LabIoOperations {
 	 * @param exam - the exam name as {@code String}
 	 * @param dateFrom - the lower date for the range
 	 * @param dateTo - the highest date for the range
-	 * @param patient - the object of patient 
-	 * @return the list of {@link Laboratory}s 
+	 * @param patient - the object of patient
+	 * @return the list of {@link Laboratory}s
 	 * @throws OHServiceException
 	 */
 	public List<Laboratory> getLaboratory(String exam, LocalDateTime dateFrom, LocalDateTime dateTo, Patient patient) throws OHServiceException {
@@ -162,7 +168,7 @@ public class LabIoOperations {
 	/**
 	 * Return a list of exams suitable for printing ({@link LaboratoryForPrint}s) within the last week.
 	 *
-	 * @return the list of {@link LaboratoryForPrint}s 
+	 * @return the list of {@link LaboratoryForPrint}s
 	 * @throws OHServiceException
 	 */
 	public List<LaboratoryForPrint> getLaboratoryForPrint() throws OHServiceException {
@@ -172,17 +178,16 @@ public class LabIoOperations {
 	}
 
 	/**
-	 * Return a list of exams suitable for printing ({@link LaboratoryForPrint}s) 
-	 * between specified dates and matching passed exam name.
+	 * Return a list of exams suitable for printing ({@link LaboratoryForPrint}s) between specified dates and matching passed exam name.
 	 *
 	 * @param exam - the exam name as {@code String}
 	 * @param dateFrom - the lower date for the range
 	 * @param dateTo - the highest date for the range
-	 * @return the list of {@link LaboratoryForPrint}s 
+	 * @return the list of {@link LaboratoryForPrint}s
 	 * @throws OHServiceException
 	 */
 	public List<LaboratoryForPrint> getLaboratoryForPrint(String exam, LocalDateTime dateFrom, LocalDateTime dateTo, Patient patient)
-					throws OHServiceException {
+		throws OHServiceException {
 		List<LaboratoryForPrint> pLaboratory = new ArrayList<>();
 		List<Laboratory> laboritories = new ArrayList<>();
 		LocalDateTime truncatedDateFrom = TimeTools.truncateToSeconds(dateFrom.with(LocalTime.MIN));
@@ -203,12 +208,12 @@ public class LabIoOperations {
 		for (Laboratory laboratory : laboritories) {
 
 			pLaboratory.add(new LaboratoryForPrint(
-							laboratory.getCode(),
-							laboratory.getExam(),
-							laboratory.getLabDate(),
-							laboratory.getResult(),
-							laboratory.getPatName(),
-							laboratory.getPatient().getCode()));
+				laboratory.getCode(),
+				laboratory.getExam(),
+				laboratory.getLabDate(),
+				laboratory.getResult(),
+				laboratory.getPatName(),
+				laboratory.getPatient().getCode()));
 		}
 		return pLaboratory;
 	}
@@ -221,6 +226,7 @@ public class LabIoOperations {
 	 * @throws OHServiceException
 	 */
 	private Laboratory newLaboratory(Laboratory laboratory) throws OHServiceException {
+		applicationEventPublisher.publishEvent(new LaboratoryExamCreatedEvent(laboratory));
 		return repository.save(laboratory);
 	}
 
@@ -257,13 +263,12 @@ public class LabIoOperations {
 	}
 
 	/**
-	 * Return a list of exams suitable for printing ({@link LaboratoryForPrint}s) 
-	 * between specified dates and matching passed exam name.
+	 * Return a list of exams suitable for printing ({@link LaboratoryForPrint}s) between specified dates and matching passed exam name.
 	 *
 	 * @param exam - the exam name as {@code String}
 	 * @param dateFrom - the starting date for the date range
 	 * @param dateTo - the ending date for the date range
-	 * @return the list of {@link LaboratoryForPrint}s 
+	 * @return the list of {@link LaboratoryForPrint}s
 	 * @throws OHServiceException
 	 */
 	public List<LaboratoryForPrint> getLaboratoryForPrint(String exam, LocalDateTime dateFrom, LocalDateTime dateTo) throws OHServiceException {
@@ -272,15 +277,15 @@ public class LabIoOperations {
 		LocalDateTime truncatedDateTo = TimeTools.truncateToSeconds(dateTo.with(LocalTime.MAX));
 
 		Iterable<Laboratory> laboratories = exam != null
-						? repository.findByLabDateBetweenAndExam_DescriptionContainingOrderByExam_Examtype_DescriptionDesc(truncatedDateFrom, truncatedDateTo, exam)
-						: repository.findByLabDateBetweenOrderByExam_Examtype_DescriptionDesc(truncatedDateFrom, truncatedDateTo);
+			? repository.findByLabDateBetweenAndExam_DescriptionContainingOrderByExam_Examtype_DescriptionDesc(truncatedDateFrom, truncatedDateTo, exam)
+			: repository.findByLabDateBetweenOrderByExam_Examtype_DescriptionDesc(truncatedDateFrom, truncatedDateTo);
 
 		for (Laboratory laboratory : laboratories) {
 			pLaboratory.add(new LaboratoryForPrint(
-							laboratory.getCode(),
-							laboratory.getExam(),
-							laboratory.getLabDate(),
-							laboratory.getResult()));
+				laboratory.getCode(),
+				laboratory.getExam(),
+				laboratory.getLabDate(),
+				laboratory.getResult()));
 		}
 		return pLaboratory;
 	}
@@ -320,8 +325,8 @@ public class LabIoOperations {
 	}
 
 	/**
-	 * Update an already existing Laboratory exam {@link Laboratory} (Procedure One).
-	 * If the old exam was Procedure Two then all its related results are deleted.
+	 * Update an already existing Laboratory exam {@link Laboratory} (Procedure One). If the old exam was Procedure Two then all its related results are
+	 * deleted.
 	 *
 	 * @param laboratory - the {@link Laboratory} to update
 	 * @return {@code true} if the exam has been updated, {@code false} otherwise
@@ -334,8 +339,8 @@ public class LabIoOperations {
 	}
 
 	/**
-	 * Update an already existing Laboratory exam {@link Laboratory} (Procedure Two).
-	 * Previous results are deleted and replaced with new ones.
+	 * Update an already existing Laboratory exam {@link Laboratory} (Procedure Two). Previous results are deleted and replaced with new ones.
+	 * 
 	 * @param laboratory - the {@link Laboratory} to update
 	 * @return the updated {@link Laboratory} object.
 	 * @throws OHServiceException
@@ -352,8 +357,8 @@ public class LabIoOperations {
 	}
 
 	/**
-	 * Delete a Laboratory exam {@link Laboratory} (Procedure One or Two).
-	 * Previous results, if any, are deleted as well.
+	 * Delete a Laboratory exam {@link Laboratory} (Procedure One or Two). Previous results, if any, are deleted as well.
+	 * 
 	 * @param aLaboratory - the {@link Laboratory} to delete
 	 * @throws OHServiceException
 	 */
@@ -373,7 +378,7 @@ public class LabIoOperations {
 	 *
 	 * @param code - the laboratory code
 	 * @return {@code true} if the code is already in use, {@code false} otherwise
-	 * @throws OHServiceException 
+	 * @throws OHServiceException
 	 */
 	public boolean isCodePresent(Integer code) throws OHServiceException {
 		return repository.existsById(code);
@@ -384,16 +389,18 @@ public class LabIoOperations {
 	}
 
 	public PagedResponse<Laboratory> getLaboratoryPageable(String exam, LocalDateTime dateFrom, LocalDateTime dateTo, Patient patient, int page, int size)
-					throws OHServiceException {
+		throws OHServiceException {
 		Page<Laboratory> laboratories = null;
 		LocalDateTime truncatedDateFrom = TimeTools.truncateToSeconds(dateFrom.with(LocalTime.MIN));
 		LocalDateTime truncatedDateTo = TimeTools.truncateToSeconds(dateTo.with(LocalTime.MAX));
 
 		if (exam != null && patient != null) {
-			laboratories = repository.findByLabDateBetweenAndExamDescriptionAndPatientCodePage(truncatedDateFrom, truncatedDateTo, exam, patient, PageRequest.of(page, size));
+			laboratories = repository.findByLabDateBetweenAndExamDescriptionAndPatientCodePage(truncatedDateFrom, truncatedDateTo, exam, patient,
+				PageRequest.of(page, size));
 		}
 		if (exam != null && patient == null) {
-			laboratories = repository.findByLabDateBetweenAndExam_DescriptionOrderByLabDateDescPage(truncatedDateFrom, truncatedDateTo, exam, PageRequest.of(page, size));
+			laboratories = repository.findByLabDateBetweenAndExam_DescriptionOrderByLabDateDescPage(truncatedDateFrom, truncatedDateTo, exam,
+				PageRequest.of(page, size));
 		}
 		if (patient != null && exam == null) {
 			laboratories = repository.findByLabDateBetweenAndPatientCodePage(truncatedDateFrom, truncatedDateTo, patient, PageRequest.of(page, size));
