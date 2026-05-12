@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS OH_PLUGIN (
 -- ----------------------------------------------------------------------------
 -- OH_PLUGIN_APPROVAL
 -- One row per approved item (capability, permission, field, connection).
--- Rows are never deleted — permanent approval audit trail.
+-- ON DELETE CASCADE: approval rows are removed when the plugin is uninstalled.
+-- The approval trail is preserved in OH_PLUGIN_EVENT via PLE_PLUGIN_ID_COPY.
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS OH_PLUGIN_APPROVAL (
     PLA_ID            BIGINT       NOT NULL AUTO_INCREMENT,
@@ -46,7 +47,8 @@ CREATE TABLE IF NOT EXISTS OH_PLUGIN_APPROVAL (
     CONSTRAINT PK_PLUGIN_APPROVAL
         PRIMARY KEY (PLA_ID),
     CONSTRAINT FK_APPROVAL_PLUGIN
-        FOREIGN KEY (PLA_PLUGIN_ID) REFERENCES OH_PLUGIN (PLG_ID),
+        FOREIGN KEY (PLA_PLUGIN_ID) REFERENCES OH_PLUGIN (PLG_ID)
+        ON DELETE CASCADE,
     CONSTRAINT CHK_APPROVAL_TYPE
         CHECK (PLA_APPROVAL_TYPE IN
             ('CAPABILITY', 'PERMISSION', 'FIELD', 'CONNECTION', 'SENSITIVE'))
@@ -76,9 +78,13 @@ CREATE TABLE IF NOT EXISTS OH_PLUGIN_EVENT (
     CONSTRAINT CHK_EVENT_TYPE
         CHECK (PLE_EVENT_TYPE IN
             ('UPLOADED', 'APPROVED', 'INSTALLED', 'STARTED',
-             'STOPPED', 'DISABLED', 'ENABLED', 'UNINSTALLED', 'FAILED'))
+             'STOPPED', 'DISABLED', 'ENABLED', 'UNINSTALLED', 'FAILED',
+             'CONFIG_CHANGED'))
 );
 
+-- ----------------------------------------------------------------------------
+-- Indexes
+-- ----------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS IDX_PLUGIN_STATUS
     ON OH_PLUGIN (PLG_STATUS);
 
@@ -110,3 +116,5 @@ INSERT INTO OH_GROUPPERMISSION (GP_UG_ID_A, GP_P_ID_A, GP_ACTIVE, GP_CREATED_BY,
     VALUES ('admin', 174, 1, NULL, NULL, NULL, NULL);
 INSERT INTO OH_GROUPPERMISSION (GP_UG_ID_A, GP_P_ID_A, GP_ACTIVE, GP_CREATED_BY, GP_CREATED_DATE, GP_LAST_MODIFIED_BY, GP_LAST_MODIFIED_DATE)
     VALUES ('admin', 175, 1, NULL, NULL, NULL, NULL);
+
+-- guest has no plugin management permissions (intentional)
